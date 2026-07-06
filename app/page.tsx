@@ -122,7 +122,14 @@ export default function Celano() {
   const [accruedYield, setAccruedYield] = useState(9.87);
   useEffect(() => {
     const id = setInterval(() => {
-      setAccruedYield((a) => +(a + 0.011 + Math.random() * 0.004).toFixed(2));
+      setAccruedYield((a) => {
+        const next = +(a + 0.011 + Math.random() * 0.004).toFixed(2);
+        // Occasionally record in ledger so it feels like things are happening on-chain
+        if (Math.random() > 0.7) {
+          logActivity("YIELD ACCRUED", `+${(next - a).toFixed(2)} USD (encrypted)`);
+        }
+        return next;
+      });
     }, 3800);
     return () => clearInterval(id);
   }, []);
@@ -429,8 +436,19 @@ export default function Celano() {
                 </div>
 
                 {lastDecryptedHandle && (
-                  <div className="mt-1 text-[10px] font-mono text-emerald-400/70">
+                  <div className="mt-1 flex items-center gap-2 text-[10px] font-mono text-emerald-400/70">
                     from {lastDecryptedHandle.slice(0, 10)}…{lastDecryptedHandle.slice(-6)}
+                    {privateValue && (
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(privateValue);
+                          toast.success("Decrypted value copied");
+                        }}
+                        className="rounded border border-emerald-500/30 px-1.5 py-px text-[9px] hover:bg-emerald-500/10"
+                      >
+                        COPY
+                      </button>
+                    )}
                   </div>
                 )}
                 <div className="mt-0.5 flex items-center gap-2 text-xs text-emerald-400/70">

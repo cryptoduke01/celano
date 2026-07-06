@@ -14,14 +14,14 @@
 
 ## Key Screenshots to Capture (order matters)
 
-1. Hero + big ASCII castle + "ENTER THE CASTLE" button
-2. The Keep — encrypted total + VaultDoor + "DECRYPT MY POSITIONS"
-3. The Treasury — multiple positions + CastleMap + blotter table
-4. The Armory — strategy cards + deposit input + "SHIELD & BRING INSIDE"
-5. Decrypt flow — before / after (showing plaintext only after)
-6. Whitepaper page
-7. Mobile / responsive view (if it looks good)
-8. "GATES OPEN TO INITIATED" footer state
+1. Hero + new castle "C" logo + "ENTER THE CASTLE" button
+2. The Keep — encrypted total + live ticking yield + VaultDoor + "DECRYPT MY POSITIONS"
+3. The Treasury — multiple positions + live on-chain handle + CastleMap + blotter
+4. The Armory — strategy cards + one-click address copy + "SHIELD & BRING INSIDE"
+5. Grant Permit flow + real KMS decrypt (plaintext appears)
+6. Castle Ledger with multiple entries + tx links
+7. Whitepaper + docs (with proper Celano logo)
+8. Favicon / icon in browser tab (shows castle monogram)
 
 ## Recording Tips
 
