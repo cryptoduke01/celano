@@ -4,8 +4,8 @@
 // Used in nav and hero. No heavy battlements; subtle fortress reference only.
 
 export function CastleMark({ size = 36, gold = false }: { size?: number; gold?: boolean }) {
-  const stroke = gold ? "#c5a26f" : "#f4f4f5";
-  const bg = "#111113";
+  const stroke = gold ? "#eab308" : "#f8f8f8";
+  const bg = "#0a0a0a";
   return (
     <svg
       width={size}

@@ -10,6 +10,7 @@ export const size = {
 export const contentType = 'image/png';
 
 export default function AppleIcon() {
+  // Celano monogram — clean yellow "C" on near-black. Matches the nav mark.
   return new ImageResponse(
     (
       <div
@@ -19,22 +20,19 @@ export default function AppleIcon() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#0a0a0b',
-          borderRadius: 36,
+          background: '#0a0a0a',
+          borderRadius: 40,
         }}
       >
-        <svg width="120" height="120" viewBox="0 0 28 28" fill="none">
-          <rect x="4" y="3" width="4" height="3" fill="#e4e4e7" />
-          <rect x="12" y="3" width="4" height="3" fill="#e4e4e7" />
-          <rect x="20" y="3" width="4" height="3" fill="#e4e4e7" />
+        <svg width="118" height="118" viewBox="0 0 36 36" fill="none">
           <path
-            d="M7 8 Q7 20 14 20 Q21 20 21 12"
-            stroke="#f4f4f5"
-            strokeWidth="3.5"
+            d="M11 11 Q11 25 18 25 Q25 25 25 17.5"
+            stroke="#eab308"
+            strokeWidth="5"
             strokeLinecap="round"
             fill="none"
           />
-          <rect x="10" y="11" width="3" height="3" fill="#0a0a0b" />
+          <rect x="15" y="16" width="3.5" height="3.5" rx="0.5" fill="#0a0a0a" />
         </svg>
       </div>
     ),

@@ -351,26 +351,29 @@ export default function Celano() {
       {/* Top bar */}
       <nav className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--bg)]/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 md:px-8">
-          <div className="flex items-center gap-3">
-            <CastleMark size={32} gold />
-            <div className="leading-none">
-              <div className="logotype text-[21px] tracking-[-0.01em]">Celano</div>
-              <div className="eyebrow mt-1 text-[9px]">Private Yield · Zama</div>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <CastleMark size={30} gold />
+              <div className="logotype text-[20px]">Celano</div>
             </div>
-            {isLive ? (
-              <span className="pill pill-green ml-1 hidden md:inline-flex"><span className="dot dot-live" />Live</span>
-            ) : (
-              <span className="pill pill-demo ml-1 hidden md:inline-flex"><span className="dot dot-demo" />Demo</span>
-            )}
+            <div className="hidden items-center gap-5 text-[13px] text-[var(--text-muted)] md:flex">
+              <a href="#treasury" className="transition-colors hover:text-[var(--text)]">Treasury</a>
+              <a href="#positions" className="transition-colors hover:text-[var(--text)]">Positions</a>
+              <Link href="/docs" className="transition-colors hover:text-[var(--text)]">Docs</Link>
+            </div>
           </div>
 
           <div className="flex items-center gap-2.5">
-            <span className="chip hidden sm:inline-flex"><span className="dot dot-gold" />Sepolia</span>
             {isConnected && (
-              <span className="chip hidden md:inline-flex tabular-nums">
+              <span className="chip hidden tabular-nums lg:inline-flex">
                 <span className="text-[var(--text-faint)]">Accrued</span>
-                <span className="font-medium text-[var(--gold-bright)]">+${accruedYield.toFixed(2)}</span>
+                <span className="font-medium text-[var(--yellow-bright)]">+${accruedYield.toFixed(2)}</span>
               </span>
+            )}
+            {isLive ? (
+              <span className="pill pill-green hidden sm:inline-flex"><span className="dot dot-live" />On-chain</span>
+            ) : (
+              <span className="pill pill-demo hidden sm:inline-flex"><span className="dot dot-demo" />Demo</span>
             )}
             {isConnected ? (
               <button onClick={handleDisconnect} className="btn btn-secondary font-mono text-xs">
@@ -405,7 +408,7 @@ export default function Celano() {
         </header>
 
         {/* Encrypted value — primary treasury surface */}
-        <section className="mb-6">
+        <section id="treasury" className="mb-6 scroll-mt-24">
           <div className="mb-3 flex items-baseline justify-between px-0.5">
             <span className="eyebrow">Treasury · Encrypted Value</span>
             <span className="text-[11px] text-[var(--text-faint)]">Decrypt on demand · KMS</span>
@@ -468,11 +471,11 @@ export default function Celano() {
                 {onChainSharesHandle && (
                   <div
                     className="mt-3 inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 font-mono text-[11px]"
-                    style={{ borderColor: "rgba(70,201,139,0.3)", background: "var(--live-dim)", color: "var(--live)" }}
+                    style={{ borderColor: "rgba(34,197,94,0.3)", background: "var(--live-dim)", color: "var(--live)" }}
                   >
                     <span className="dot dot-live" />
                     On-chain handle {String(onChainSharesHandle).slice(0, 10)}…{String(onChainSharesHandle).slice(-6)}
-                    <button onClick={() => copyText(String(onChainSharesHandle), "Live handle copied")} className="ml-1 rounded border border-[rgba(70,201,139,0.35)] px-1.5 py-px text-[9px]">
+                    <button onClick={() => copyText(String(onChainSharesHandle), "Live handle copied")} className="ml-1 rounded border border-[rgba(34,197,94,0.35)] px-1.5 py-px text-[9px]">
                       Copy
                     </button>
                   </div>
@@ -530,7 +533,7 @@ export default function Celano() {
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
           {/* Positions */}
-          <div className="xl:col-span-7">
+          <div id="positions" className="scroll-mt-24 xl:col-span-7">
             <div className="mb-3 flex items-center justify-between px-0.5">
               <span className="eyebrow">Positions{positions.length > 0 ? ` · ${positions.length}` : ""}</span>
               <span className="text-[11px] text-[var(--text-faint)]">Encrypted · on-chain</span>
@@ -553,7 +556,7 @@ export default function Celano() {
                         <tr>
                           <td>
                             <div className="flex items-center gap-2.5">
-                              <span className="flex h-7 w-7 items-center justify-center rounded-md border border-[rgba(70,201,139,0.3)] bg-[var(--live-dim)] font-mono text-[10px] text-[var(--live)]">ON</span>
+                              <span className="flex h-7 w-7 items-center justify-center rounded-md border border-[rgba(34,197,94,0.3)] bg-[var(--live-dim)] font-mono text-[10px] text-[var(--live)]">ON</span>
                               <span className="font-medium text-[var(--text)]">On-chain</span>
                             </div>
                           </td>

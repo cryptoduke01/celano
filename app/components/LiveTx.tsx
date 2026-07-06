@@ -17,7 +17,7 @@ export function LiveTx({ hash, chain = "sepolia" }: { hash: string | null; chain
       rel="noopener noreferrer"
       className="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 font-mono text-[10.5px] tracking-[0.06em] transition"
       style={{
-        borderColor: "rgba(70,201,139,0.3)",
+        borderColor: "rgba(34,197,94,0.3)",
         background: "var(--live-dim)",
         color: "var(--live)",
       }}

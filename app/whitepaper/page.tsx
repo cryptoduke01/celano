@@ -3,10 +3,10 @@ import { CastleLogo } from "@/app/components/CastleMark";
 
 export default function Whitepaper() {
   return (
-    <div className="min-h-screen bg-[#0b0b0c] text-[#f4f4f5]">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
       <div className="mx-auto max-w-3xl px-8 py-16">
-        <div className="mb-12 border-b border-[#252528] pb-8">
-          <Link href="/" className="text-sm text-[#a1a1aa] hover:text-[#f4f4f5]">← Back</Link>
+        <div className="mb-12 border-b border-[var(--border)] pb-8">
+          <Link href="/" className="text-sm text-[var(--text-muted)] hover:text-[var(--text)]">← Back</Link>
           <div className="mt-6">
             <CastleLogo />
           </div>

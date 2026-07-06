@@ -3,9 +3,9 @@ import { CastleLogo } from "@/app/components/CastleMark";
 
 export default function Docs() {
   return (
-    <div className="min-h-screen bg-[#0b0b0c] text-[#f4f4f5]">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
       <div className="mx-auto max-w-4xl px-8 py-12">
-        <Link href="/" className="text-sm text-[#a1a1aa] hover:text-[#f4f4f5]">← Back</Link>
+        <Link href="/" className="text-sm text-[var(--text-muted)] hover:text-[var(--text)]">← Back</Link>
 
         <div className="mt-6">
           <CastleLogo />
