@@ -10,7 +10,7 @@ export default function Whitepaper() {
           <div className="mt-6">
             <CastleLogo />
           </div>
-          <p className="mt-3 text-xl text-zinc-400">The Castle • Private Yield on Zama Protocol</p>
+          <p className="mt-3 text-xl text-zinc-400">Confidential Yield Treasury on Zama Protocol</p>
           <p className="mt-4 text-sm text-zinc-500">Litepaper • Zama Developer Program Mainnet Season 3</p>
         </div>
 
@@ -40,19 +40,19 @@ export default function Whitepaper() {
 
           <h2>The Solution: Celano</h2>
           <p>
-            Celano is the castle that guards your encrypted capital.
+            Celano is a confidential treasury for your encrypted capital.
           </p>
           <ul>
             <li>Shield public tokens into official ERC-7984 confidential wrappers using Zama’s on-chain Registry.</li>
             <li>Deposit via real <code>confidentialTransferAndCall</code> — the ciphertext is the only thing that ever touches the vault.</li>
-            <li>Positions live as <code>euint64</code> inside the castle. Only the owner can decrypt.</li>
+            <li>Positions live on-chain as <code>euint64</code> handles. Only the owner can decrypt.</li>
             <li>Withdraw calls back through the confidential token — privacy preserved on the way out.</li>
-            <li>Public sees only stone walls and aggregate activity.</li>
+            <li>The public sees only ciphertext and aggregate activity.</li>
           </ul>
 
           <h2>Architecture</h2>
           <p>
-            Celano is deliberately thin. We do not mint new tokens. We compose inside the castle walls:
+            Celano is deliberately thin. We do not mint new tokens. We compose using the official primitives:
           </p>
           <ul>
             <li><strong>Official Zama Wrappers Registry</strong> — discover and use canonical ERC-7984 tokens.</li>
@@ -72,24 +72,23 @@ export default function Whitepaper() {
 
           <h2>Why This Wins for Composable Privacy</h2>
           <p>
-            Previous seasons saw many isolated confidential payments and airdrops. Season 3 explicitly 
-            rewards composability. Celano takes the newly live confidential DeFi primitives (wrappers + 
-            yield) and places them inside a production-grade fortress UI with proper castle-grade privacy UX.
+            Previous seasons saw many isolated confidential payments and airdrops. Season 3 explicitly
+            rewards composability. Celano takes the newly live confidential DeFi primitives (wrappers +
+            yield) and places them behind a production-grade interface with rigorous, user-controlled privacy UX.
           </p>
 
-          <h2>The Castle Metaphor</h2>
+          <h2>Interface</h2>
           <p>
-            Celano is not just branding. It is the entire design language.
+            The product is a single, data-dense treasury dashboard — the language is institutional, not decorative:
           </p>
           <ul>
-            <li><strong>The Outer Wall</strong> — public ERC-20s are converted at the gates into confidential wrappers.</li>
-            <li><strong>The Keep</strong> — your aggregate encrypted portfolio value (visible only to you).</li>
-            <li><strong>The Treasury</strong> — individual encrypted positions.</li>
-            <li><strong>The Armory</strong> — where you choose strategies and bring capital inside.</li>
-            <li><strong>The Gates</strong> — every action (shield, deposit, decrypt, withdraw) is treated as opening or sealing a gate.</li>
+            <li><strong>Encrypted Value</strong> — your aggregate position, shown as ciphertext until you decrypt it.</li>
+            <li><strong>Positions</strong> — a blotter of encrypted holdings, including the live on-chain <code>sharesOf</code> handle.</li>
+            <li><strong>Deposit</strong> — strategy selection, amount, and the real seal-and-deposit flow.</li>
+            <li><strong>Ledger</strong> — every action (seal, permit, decrypt, withdraw) with on-chain transaction links.</li>
           </ul>
           <p>
-            The UI uses historic dotted patterns, battlements, and stone textures. Typography (Cinzel + EB Garamond) carries the weight of ancient stone and classical documents.
+            The name and the seal metaphor are the only brand notes; everything else is optimized for trust and scannability. Typography pairs Space Grotesk (display) with EB Garamond for long-form documents like this one.
           </p>
 
           <h2>Status &amp; Roadmap</h2>
@@ -97,7 +96,7 @@ export default function Whitepaper() {
 
           <div className="mt-12 border-t border-white/10 pt-8 text-sm text-zinc-500">
             This document is a litepaper for the Zama Developer Program. Not financial advice.<br />
-            We build fortresses. We do not ship slop.
+            Built with the official Zama stack. No mocks where it matters.
           </div>
         </div>
       </div>

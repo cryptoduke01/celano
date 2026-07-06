@@ -1,12 +1,13 @@
 // Celano — ConfidentialYieldVault Deploy Script
 // Run: pnpm deploy:sepolia
-// After deploy, paste the vault address into the UI "TARGET CASTLE VAULT" field.
+// After deploy, set NEXT_PUBLIC_VAULT_ADDRESS in your env, or paste the address
+// into the UI "Vault Address · Sepolia" field to switch into LIVE mode.
 
 import hre from "hardhat";
 
 async function main() {
   const [deployer] = await hre.ethers.getSigners();
-  console.log("\n🏰 Deploying Celano Castle Vault");
+  console.log("\nDeploying Celano — ConfidentialYieldVault");
   console.log("Deployer:", deployer.address);
 
   const C_USDC_MOCK = "0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639"; // official Zama Sepolia cUSDC wrapper
@@ -21,9 +22,10 @@ async function main() {
   console.log("   Accepting encrypted deposits of:", C_USDC_MOCK);
   console.log("\nNext steps:");
   console.log("  1. Copy the vault address above");
-  console.log("  2. Paste it into the Celano UI → The Armory → TARGET CASTLE VAULT");
-  console.log("  3. Use the app to Shield & Bring Inside (real confidentialTransferAndCall)");
-  console.log("  4. (Optional) Verify on Etherscan if desired\n");
+  console.log("  2. Set NEXT_PUBLIC_VAULT_ADDRESS=<address> (Vercel env) or paste it");
+  console.log("     into the UI → Deposit → Vault Address · Sepolia field");
+  console.log("  3. Seal & Deposit runs the real confidentialTransferAndCall");
+  console.log("  4. (Optional) Verify on Etherscan\n");
 }
 
 main().catch((error) => {

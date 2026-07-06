@@ -1,53 +1,37 @@
 # Celano
 
-**The Castle. Private Yield on Zama.**
+**Confidential Yield Treasury on Zama. Sealed yield. Yours alone.**
 
-Celano is a real historic town in Abruzzo whose castle has protected what matters for centuries.
+Celano is a confidential treasury built on Zama FHEVM. Deposits are encrypted in your
+browser, moved on-chain as ciphertext through the official ERC-7984 flow, stored as an
+encrypted `euint64` position, and decrypted **only** when you request it via Zama KMS.
+The public sees ciphertext; you see your number.
 
-We built the onchain equivalent.
+Built for the **Zama Developer Program — Mainnet Season 3 (Builder Track)**. Theme: **Composable Privacy**.
 
-Shield. Encrypt. Enter the keep.
-Only you can see inside.
+---
 
-Industry-grade dark UI. Castle architecture. Dotted fortress patterns. Real Zama FHE.
+## What it does
 
-Branding: Custom castle "C" monogram (battlements) used as favicon, apple icon, and throughout the interface.
+- Deposit confidential tokens (cUSDC on Sepolia) into a yield vault via **real** `confidentialTransferAndCall` — ciphertext only.
+- Positions are stored on-chain as encrypted `euint64` handles inside `ConfidentialYieldVault` (`IERC7984Receiver`).
+- User-controlled decryption via Zama KMS with an explicit **EIP-712 permit** — nobody else can read your position.
+- Confidential `withdraw()` returns your position privately.
+- **LIVE / DEMO** mode: set a deployed vault address and the whole app runs the real on-chain path.
 
-Built for Zama Developer Program Mainnet Season 3 — Builder Track.
+## Why it stands out
 
-Built for the Zama Developer Program — Mainnet Season 3 (Builder Track).
+- Official Zama stack only — Wrappers Registry + ERC-7984 + KMS.
+- Real receiver-callback composition (confidential token → yield vault), not a UI mock.
+- Institutional, trustworthy UX (Morpho/Gauntlet-tier) with purposeful decrypt motion — no demo slop.
+- Rides the live confidential-DeFi wave (cUSDC wrappers + yield).
 
-## The biggest track
+## Stack
 
-Targeting Builder Track 1st place (2,500 cUSDT) — Zama Developer Program Mainnet Season 3.
-
-Theme: Composable Privacy.
-
-## What it is
-
-- Shield using official Zama wrappers (real ERC-20 → ERC-7984 on Sepolia)
-- **Real** `confidentialTransferAndCall` into the vault (ciphertext only)
-- Positions stored as euint64 inside the on-chain castle
-- User-controlled decryption via Zama KMS
-- Withdraw returns value privately
-
-This is composable private DeFi done right — with actual on-chain execution.
-
-## Why this stands out for 1st
-
-- Official Zama stack only (Wrappers Registry + ERC-7984 patterns)
-- Real encrypted yield flow using the receiver callback pattern
-- Premium UI with historic dotted patterns — no demo slop
-- Directly rides the live confidential DeFi wave (cUSDC wrappers + yield)
-- Proper FHE discipline + excellent states and privacy UX
-
-## Stack (strict, high bar)
-
-- Next.js 16 + TypeScript (strict)
-- wagmi + viem
-- @zama-fhe/react-sdk + @zama-fhe/sdk
-- Custom ConfidentialYieldVault (Hardhat + FHEVM)
-- Premium dark UI with historic dotted patterns + classical typography (Cinzel for brand, EB Garamond for long-form)
+- Next.js 16 + TypeScript (strict), wagmi + viem
+- `@zama-fhe/react-sdk` + `@zama-fhe/sdk`
+- `ConfidentialYieldVault` (Hardhat + FHEVM, `@fhevm/solidity`, `@openzeppelin/confidential-contracts`)
+- Design system documented in [`DESIGN.md`](./DESIGN.md)
 
 ## Local development
 
@@ -56,55 +40,48 @@ pnpm install
 pnpm dev
 ```
 
-Connect to Sepolia. Use the official mock cUSDC (public mint available on the underlying).
+Connect to Sepolia. Copy the test asset addresses from the Deposit panel (official mock cUSDC + Wrappers Registry).
 
-## Pre-flight (from our project skill)
+## Pre-flight
 
 ```bash
-pnpm pre-flight
+pnpm pre-flight   # typecheck; must pass before shipping
+pnpm build        # full production build
 ```
-
-Must pass before any serious push or submission work.
 
 ## Deploy
 
-- Contracts: `pnpm deploy:sepolia`
-- Frontend: Vercel (one click)
+**Contract (Sepolia):**
 
-## Skill implementation
+```bash
+# set SEPOLIA_RPC and PRIVATE_KEY in .env.local first (see .env.example)
+pnpm deploy:sepolia
+```
 
-We follow the principles from tushaarmehtaa/tushar-skills (and our own SKILL.md):
+Then either set `NEXT_PUBLIC_VAULT_ADDRESS=<address>` (recommended for the hosted demo,
+so it opens in LIVE mode) or paste the address into the UI → **Deposit → Vault Address · Sepolia**.
 
-- No AI slop in copy or code
-- Pre-flight checks before shipping steps
-- Premium UI as a non-negotiable
-- Real on-chain flows with the official stack
-- Launch-ready artifacts (video, docs, submission)
+**Frontend:** deploy to Vercel. Set `NEXT_PUBLIC_VAULT_ADDRESS` in the project env.
 
-## Status
+## How it works
 
-**Castle complete.** Premium industry UI with full castle metaphor (Keep • Treasury • Armory • Gates).
-
-✅ Pre-flight passes
-✅ Production build clean
-✅ Whitepaper + Docs + Submission assets
-✅ Castle patterns, dotted battlements, dense data, professional states
-
-Ready for video + Vercel deploy + final push.
+1. **Encrypt** — the deposit amount is encrypted client-side (`euint64`) before it touches the chain.
+2. **Vault** — `confidentialTransferAndCall` moves only ciphertext into the vault, which implements `IERC7984Receiver`.
+3. **Decrypt** — you alone request KMS decryption via grant + EIP-712 permit. Nothing about your position is public.
 
 ## Documentation
 
-- [Whitepaper (The Castle Story)](/whitepaper)
-- [Docs (How to Enter)](/docs)
+- [Whitepaper](/whitepaper)
+- [Docs](/docs)
+- [DESIGN.md](./DESIGN.md) — visual system, tokens, motion, states
+- [SUBMISSION.md](./SUBMISSION.md) — video script, screenshots, judge talking points
 
-## Submission Assets
+## Status
 
-- [SUBMISSION.md](./SUBMISSION.md) — video script, key screenshots, judge talking points
-- Full castle UI (The Keep, Treasury, Armory, Gates, Castle Map)
-- All flows instrumented with professional states
+- ✅ Real FHE flows end-to-end on the official stack
+- ✅ Production build clean (Next.js 16 + strict TS), pre-flight passes
+- ✅ Institutional UI + documented design system
+- ✅ Whitepaper + Docs + submission kit
+- ⏳ Sepolia vault deploy + Vercel deploy + video
 
-High standards. No slop. Castle-grade execution.
-
-We do not stop until it is done.
-
-Let’s win the Builder Track.
+Targeting Builder Track 1st place.

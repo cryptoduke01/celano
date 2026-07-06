@@ -74,8 +74,10 @@ export default function Celano() {
     }, ...prev].slice(0, 12)); // keep last 12
   }
 
-  // === CASTLE VAULT (deploy with `pnpm deploy:sepolia` and paste here for real on-chain flow) ===
-  const [vaultAddress, setVaultAddress] = useState<string>("0xYourDeployedVaultAddressHere");
+  // === VAULT (deploy with `pnpm deploy:sepolia`; set NEXT_PUBLIC_VAULT_ADDRESS or paste in the UI for the live flow) ===
+  const [vaultAddress, setVaultAddress] = useState<string>(
+    process.env.NEXT_PUBLIC_VAULT_ADDRESS || "0xYourDeployedVaultAddressHere"
+  );
 
   // Last on-chain tx
   const [lastTxHash, setLastTxHash] = useState<string | null>(null);

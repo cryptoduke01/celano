@@ -43,13 +43,13 @@ export default function Docs() {
         </div>
 
         <div className="mt-16 docs-body">
-          <h2 className="brand-heading mt-8">Castle Rooms</h2>
-          <p className="text-sm text-zinc-400">The interface is organized like the fortress:</p>
+          <h2 className="brand-heading mt-8">Interface</h2>
+          <p className="text-sm text-zinc-400">The dashboard is organized into four surfaces:</p>
           <ul className="list-disc pl-5 text-sm mt-2 text-zinc-400">
-            <li><strong>The Keep</strong> — total encrypted value</li>
-            <li><strong>The Treasury</strong> — your private positions</li>
-            <li><strong>The Armory</strong> — deposit / strategy selection</li>
-            <li><strong>The Gates</strong> — every shielded or encrypted action</li>
+            <li><strong>Encrypted Value</strong> — your total position, shown as ciphertext until you decrypt</li>
+            <li><strong>Positions</strong> — a blotter of encrypted holdings + the live on-chain handle</li>
+            <li><strong>Deposit</strong> — strategy selection and the seal-and-deposit flow</li>
+            <li><strong>Ledger</strong> — every encrypted action, with transaction links</li>
           </ul>
 
           <h2 id="connect" className="brand-heading mt-10">1. Connect</h2>
@@ -79,9 +79,9 @@ export default function Docs() {
 
           <h2 id="acl" className="brand-heading mt-10">ACL, Permits &amp; Decryption</h2>
           <p>
-            The vault grants the user ACL on their encrypted shares. Before decrypting you often grant a 
-            permit (EIP-712 signature) that authorizes the relayer to serve your plaintext. Celano exposes 
-            “AUTHORIZE DECRYPTION (GRANT PERMIT)” so the flow is explicit and real.
+            The vault grants the user ACL on their encrypted shares. Before decrypting you often grant a
+            permit (EIP-712 signature) that authorizes the relayer to serve your plaintext. Celano exposes
+            “Grant Decrypt Permit” so the flow is explicit and real.
           </p>
         </div>
 

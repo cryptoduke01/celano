@@ -37,7 +37,7 @@ export function CastleLogo({ className = "", gold = false }: { className?: strin
       <CastleMark size={40} gold={gold} />
       <div>
         <div className="logotype text-[28px] leading-none tracking-[-0.02em] text-[#f4f4f5]">Celano</div>
-        <div className="text-[9px] tracking-[2.5px] text-[#a1a1aa] -mt-0.5">THE CASTLE</div>
+        <div className="text-[9px] tracking-[2.5px] text-[#a1a1aa] -mt-0.5">PRIVATE YIELD · ZAMA</div>
       </div>
     </div>
   );
