@@ -6,17 +6,18 @@ import { useAccount, useConnect, useDisconnect, useWriteContract, useReadContrac
 import { injected } from "wagmi/connectors";
 import { encodeAbiParameters } from "viem";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Shield, 
-  Eye, 
-  ArrowDownToLine, 
-  Wallet, 
-  TrendingUp, 
-  Lock, 
-  ExternalLink 
+import {
+  Shield,
+  ShieldCheck,
+  Eye,
+  ArrowDownToLine,
+  Wallet,
+  KeyRound,
+  Copy,
+  Lock,
+  Activity,
 } from "lucide-react";
 import { toast } from "sonner";
-import { CastleMap } from "./components/CastleMap";
 import { VaultDoor } from "./components/VaultDoor";
 import { LiveTx } from "./components/LiveTx";
 import { CastleMark } from "./components/CastleMark";
@@ -150,8 +151,8 @@ export default function Celano() {
     }
     try {
       await grantPermit.mutateAsync([vaultAddress as `0x${string}`, selectedStrategy.address as `0x${string}`]);
-      logActivity("PERMIT GRANTED", "Authorized decryption for the castle");
-      toast.success("Permit granted. The gates now recognize you for decryption.");
+      logActivity("PERMIT GRANTED", "Authorized KMS decryption for this account");
+      toast.success("Decryption permit granted. You can now unseal your positions.");
     } catch (e: any) {
       console.error(e);
       toast.error("Permit failed: " + (e?.message || "User may have rejected"));
@@ -244,7 +245,7 @@ export default function Celano() {
       return;
     }
     if (!vaultAddress || vaultAddress.includes("YourDeployed")) {
-      toast.error("Set a real vault address in The Armory (deploy with pnpm deploy:sepolia)");
+      toast.error("Set a deployed vault address in the deposit panel first (pnpm deploy:sepolia).");
       return;
     }
 
@@ -296,10 +297,10 @@ export default function Celano() {
         },
       ]);
 
-      toast.success(`Ciphertext sealed. TX broadcast to the castle gates.`, {
+      toast.success(`Ciphertext sealed. Transaction broadcast to Sepolia.`, {
         description: "Only you control the decryption key.",
       });
-      logActivity("SEALED & DEPOSITED", `${depositAmount} ${selectedStrategy.token} brought inside`, hash);
+      logActivity("SEALED & DEPOSITED", `${depositAmount} ${selectedStrategy.token} sealed into the vault`, hash);
       setDepositAmount("");
     } catch (e: any) {
       console.error(e);
@@ -322,8 +323,8 @@ export default function Celano() {
           args: [],
         });
         setLastTxHash(hash);
-        logActivity("WITHDREW", `${pos.token} exited the castle`, hash);
-        toast.success(`Withdraw command sent to the gates. TX: ${hash.slice(0, 10)}...`);
+        logActivity("WITHDREW", `${pos.token} withdrawn from the vault`, hash);
+        toast.success(`Withdrawal submitted. TX: ${hash.slice(0, 10)}...`);
       } catch (e: any) {
         console.error(e);
         toast.error("Withdraw tx failed. " + (e?.shortMessage || e?.message || ""));
@@ -336,388 +337,331 @@ export default function Celano() {
     setPositions((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const isLive = !!vaultAddress && !vaultAddress.includes("YourDeployed");
+  const decryptBusy = decrypting || isRealDecryptFetching;
+  const copyText = (text: string, label = "Copied") => {
+    navigator.clipboard.writeText(text);
+    toast.success(label);
+  };
+
   return (
-    <div className="min-h-screen bg-[#0b0b0c] text-[#f4f4f5]">
-      {/* Top bar — premium finance style (inspired by reference dashboards) */}
-      <nav className="border-b border-[#252528] bg-[#0b0b0c]/95 backdrop-blur-xl sticky top-0 z-50">
-        <div className="mx-auto max-w-7xl px-6 md:px-8 flex h-16 items-center justify-between">
-          <div className="flex items-center gap-4">
-            <CastleMark size={34} gold />
-            <div>
-              <div className="logotype text-2xl leading-none tracking-[-0.015em]">Celano</div>
-              <div className="text-[9px] tracking-[2px] text-[#a1a1aa] -mt-px">PRIVATE YIELD • ZAMA</div>
+    <div className="relative z-10 min-h-screen">
+      {/* Top bar */}
+      <nav className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--bg)]/85 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 md:px-8">
+          <div className="flex items-center gap-3">
+            <CastleMark size={32} gold />
+            <div className="leading-none">
+              <div className="logotype text-[21px] tracking-[-0.01em]">Celano</div>
+              <div className="eyebrow mt-1 text-[9px]">Private Yield · Zama</div>
             </div>
-            {vaultAddress && !vaultAddress.includes("YourDeployed") && (
-              <div className="ml-2 hidden md:block text-[10px] px-2 py-px rounded border border-[#c5a26f]/40 text-[#c5a26f] tracking-[1px]">LIVE</div>
+            {isLive ? (
+              <span className="pill pill-green ml-1 hidden md:inline-flex"><span className="dot dot-live" />Live</span>
+            ) : (
+              <span className="pill pill-demo ml-1 hidden md:inline-flex"><span className="dot dot-demo" />Demo</span>
             )}
           </div>
 
-          <div className="flex items-center gap-3 text-sm">
-            {accruedYield !== null && isConnected && (
-              <div className="hidden md:flex items-center gap-2 rounded-full border border-[#252528] bg-[#131315] px-3 py-1 text-xs">
-                <span className="text-[#a1a1aa]">ACCRUED</span>
-                <span className="font-medium text-[#c5a26f] tabular-nums">+${accruedYield.toFixed(2)}</span>
-              </div>
+          <div className="flex items-center gap-2.5">
+            <span className="chip hidden sm:inline-flex"><span className="dot dot-gold" />Sepolia</span>
+            {isConnected && (
+              <span className="chip hidden md:inline-flex tabular-nums">
+                <span className="text-[var(--text-faint)]">Accrued</span>
+                <span className="font-medium text-[var(--gold-bright)]">+${accruedYield.toFixed(2)}</span>
+              </span>
             )}
-
-            <div className="hidden sm:flex items-center gap-1.5 rounded-full border border-[#252528] px-3 py-1 text-xs text-[#a1a1aa]">
-              SECURED
-            </div>
-
             {isConnected ? (
-              <button
-                onClick={handleDisconnect}
-                className="btn btn-secondary text-xs font-mono px-4 py-1.5"
-              >
+              <button onClick={handleDisconnect} className="btn btn-secondary font-mono text-xs">
                 {address?.slice(0, 6)}…{address?.slice(-4)}
               </button>
             ) : (
               <button onClick={handleConnect} className="btn btn-primary">
-                <Wallet className="h-4 w-4" /> CONNECT
+                <Wallet className="h-4 w-4" /> Connect
               </button>
             )}
           </div>
         </div>
       </nav>
 
-      <div className="mx-auto max-w-7xl px-6 md:px-8 pt-8 pb-20">
-        {/* Hero — clean premium dashboard feel */}
-        <div className="mb-10 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#252528] bg-[#131315] px-4 py-1 text-[10px] tracking-[2px] text-[#c5a26f] mb-4">
-            PRIVATE YIELD ON ZAMA
+      <div className="mx-auto max-w-7xl px-5 md:px-8 pt-10 pb-24">
+        {/* Page header — tool-first, left aligned */}
+        <header className="mb-8 flex flex-col gap-5 border-b border-[var(--border)] pb-8 md:flex-row md:items-end md:justify-between">
+          <div>
+            <div className="eyebrow">Confidential Treasury</div>
+            <h1 className="mt-2 text-4xl font-semibold tracking-[-0.03em] md:text-5xl">
+              Sealed yield. Yours alone.
+            </h1>
+            <p className="mt-2 max-w-xl text-[15px] text-[var(--text-muted)]">
+              Encrypted on-chain positions on Zama FHEVM. Your balances live as ciphertext — decrypt only when you choose.
+            </p>
+          </div>
+          <div className="flex items-center gap-4 text-sm">
+            <Link href="/whitepaper" className="text-[var(--text-muted)] transition-colors hover:text-[var(--text)]">Whitepaper</Link>
+            <span className="h-3 w-px bg-[var(--border-strong)]" />
+            <Link href="/docs" className="text-[var(--text-muted)] transition-colors hover:text-[var(--text)]">Docs</Link>
+          </div>
+        </header>
+
+        {/* Encrypted value — primary treasury surface */}
+        <section className="mb-6">
+          <div className="mb-3 flex items-baseline justify-between px-0.5">
+            <span className="eyebrow">Treasury · Encrypted Value</span>
+            <span className="text-[11px] text-[var(--text-faint)]">Decrypt on demand · KMS</span>
           </div>
 
-          <h1 className="text-6xl md:text-7xl font-semibold tracking-[-3.2px] leading-[0.92]">
-            Celano.<br />Sealed yield. Yours alone.
-          </h1>
+          <div className="premium-card gold-accent p-6 md:p-8">
+            <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+              {/* Value */}
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 text-[var(--text-muted)]">
+                  <Lock className="h-3.5 w-3.5" />
+                  <span className="eyebrow text-[var(--text-muted)]">Encrypted Value</span>
+                </div>
 
-          <p className="mx-auto mt-3 max-w-md text-lg text-[#a1a1aa]">
-            Encrypted on-chain positions. Decrypt only when you choose.
-          </p>
-
-          <div className="mt-4 flex justify-center gap-4 text-xs">
-            <Link href="/whitepaper" className="text-[#a1a1aa] hover:text-[#f4f4f5] underline decoration-[#252528] hover:decoration-[#c5a26f]">Whitepaper</Link>
-            <Link href="/docs" className="text-[#a1a1aa] hover:text-[#f4f4f5] underline decoration-[#252528] hover:decoration-[#c5a26f]">Docs</Link>
-          </div>
-
-          <div className="mt-6">
-            <CastleMark size={58} gold />
-          </div>
-        </div>
-
-        {/* The Keep — encrypted value + decrypt controls */}
-        <div className="mb-8">
-          <div className="flex items-baseline justify-between px-1 mb-3">
-            <div className="text-xs tracking-[1.5px] text-[#a1a1aa]">THE KEEP</div>
-            <div className="text-[10px] text-[#a1a1aa]">Encrypted value • decrypt on demand</div>
-          </div>
-
-          <motion.div
-            whileHover={{ scale: 1.001 }}
-            transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-            className="premium-card gold-accent p-8"
-          >
-            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-y-6">
-              <div>
-                <div className="text-sm text-[#a1a1aa]">ENCRYPTED VALUE</div>
-                <div className="mt-1 flex items-baseline gap-3">
-                  <span className="text-7xl font-semibold tabular-nums tracking-[-2.5px] data-dense text-[#f4f4f5]">
-                    {privateValue ? privateValue : "••••••"}
+                <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <span
+                    key={privateValue ?? "sealed"}
+                    className={`data-dense text-6xl font-semibold tracking-[-0.04em] md:text-7xl ${privateValue ? "value-reveal" : "mask-shimmer"}`}
+                  >
+                    {privateValue ?? "••••••"}
                   </span>
-                  <span className="text-3xl text-[#a1a1aa]">USD</span>
-                  {lastDecryptedHandle && (
-                    <span className="ml-1 rounded bg-emerald-500/15 px-2 py-0.5 text-[10px] text-emerald-400">KMS</span>
-                  )}
+                  <span className="text-2xl text-[var(--text-faint)]">USD</span>
+                  {lastDecryptedHandle && <span className="pill pill-green">KMS</span>}
                 </div>
 
                 {lastDecryptedHandle && (
-                  <div className="mt-1 flex items-center gap-2 text-[10px] font-mono text-emerald-400/70">
-                    from {lastDecryptedHandle.slice(0, 10)}…{lastDecryptedHandle.slice(-6)}
+                  <div className="mt-2 flex items-center gap-2 font-mono text-[11px] text-[var(--live)]">
+                    <span>from {lastDecryptedHandle.slice(0, 10)}…{lastDecryptedHandle.slice(-6)}</span>
                     {privateValue && (
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(privateValue);
-                          toast.success("Decrypted value copied");
-                        }}
-                        className="rounded border border-emerald-500/30 px-1.5 py-px text-[9px] hover:bg-emerald-500/10"
-                      >
-                        COPY
+                      <button onClick={() => copyText(privateValue, "Decrypted value copied")} className="btn btn-secondary px-2 py-0.5 text-[10px]">
+                        <Copy className="h-3 w-3" /> Copy
                       </button>
                     )}
                   </div>
                 )}
-                <div className="mt-0.5 flex items-center gap-2 text-xs text-[#c5a26f]/70">
-                  + <motion.span 
-                      key={accruedYield} 
-                      initial={{ opacity: 0.6, y: 1 }} 
-                      animate={{ opacity: 1, y: 0 }} 
-                      transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
-                      className="tabular-nums font-medium text-[#c5a26f]"
-                    >
-                      {accruedYield}
-                    </motion.span> USD yield accrued (encrypted)
-                  <span className="text-[9px] text-[#c5a26f]/50">LIVE</span>
+
+                <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-[var(--text-muted)]">
+                  <span>+</span>
+                  <motion.span
+                    key={accruedYield}
+                    initial={{ opacity: 0.55, y: 1 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                    className="tabular-nums font-medium text-[var(--gold-bright)]"
+                  >
+                    {accruedYield.toFixed(2)}
+                  </motion.span>
+                  <span>USD yield accrued (encrypted)</span>
+                  <span className="pill pill-gold"><span className="dot dot-gold" />Live</span>
                 </div>
-                <div className="mt-1 text-[10px] text-[#a1a1aa]">LAST SEALED • {new Date().toLocaleDateString()} {new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
-                <div className="mt-1 flex items-center gap-2 text-sm text-emerald-400">
-                  <TrendingUp className="h-4 w-4" /> Fully encrypted on Zama • Only the initiated may enter
+
+                <div className="mt-2 text-[11px] text-[var(--text-faint)]">
+                  Last sealed · {new Date().toLocaleDateString()} {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </div>
+
+                <div className="mt-4 flex items-center gap-2 text-[13px] text-[var(--live)]">
+                  <ShieldCheck className="h-4 w-4" /> Fully encrypted on Zama FHEVM
+                </div>
+
                 {onChainSharesHandle && (
-                  <div className="mt-2 inline-flex items-center gap-2 rounded border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-mono text-emerald-400">
-                    LIVE HANDLE: {String(onChainSharesHandle).slice(0, 10)}…{String(onChainSharesHandle).slice(-6)} • CASTLE KNOWS
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(String(onChainSharesHandle));
-                        toast.success("Live handle copied");
-                      }}
-                      className="ml-1 rounded border border-emerald-500/30 px-1.5 py-px text-[9px] hover:bg-emerald-500/10"
-                    >
-                      COPY
+                  <div
+                    className="mt-3 inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 font-mono text-[11px]"
+                    style={{ borderColor: "rgba(70,201,139,0.3)", background: "var(--live-dim)", color: "var(--live)" }}
+                  >
+                    <span className="dot dot-live" />
+                    On-chain handle {String(onChainSharesHandle).slice(0, 10)}…{String(onChainSharesHandle).slice(-6)}
+                    <button onClick={() => copyText(String(onChainSharesHandle), "Live handle copied")} className="ml-1 rounded border border-[rgba(70,201,139,0.35)] px-1.5 py-px text-[9px]">
+                      Copy
                     </button>
                   </div>
                 )}
 
-                <div className="mt-3">
+                <div className="mt-4 flex flex-wrap items-center gap-3">
                   <VaultDoor state={isDepositing || isWritePending ? "sealing" : privateValue ? "open" : "closed"} />
+                  {lastTxHash && <LiveTx hash={lastTxHash} />}
                 </div>
-
-                {lastTxHash && (
-                  <div className="mt-3">
-                    <LiveTx hash={lastTxHash} />
-                  </div>
-                )}
               </div>
 
-              <div className="flex flex-col items-end gap-2 min-w-[260px]">
-                <button
-                  onClick={handleDecryptAll}
-                  disabled={!isConnected || decrypting}
-                  className="btn btn-primary w-full justify-center"
-                >
+              {/* Actions */}
+              <div className="flex w-full shrink-0 flex-col gap-2 lg:w-[264px]">
+                <button onClick={handleDecryptAll} disabled={!isConnected || decrypting} className="btn btn-primary w-full">
                   <Eye className="h-4 w-4" />
-                  {decrypting || isRealDecryptFetching ? "DECRYPTING..." : "DECRYPT POSITIONS"}
+                  {decryptBusy ? "Decrypting…" : "Decrypt Positions"}
                 </button>
-
-                {decryptionInputs.length > 0 && (
-                  <div className="text-[10px] text-[#c5a26f]">KMS path ready</div>
-                )}
-
                 <button
                   onClick={handleGrantPermit}
-                  disabled={!isConnected || grantPermit.isPending || !vaultAddress || vaultAddress.includes("YourDeployed")}
-                  className="btn btn-secondary w-full justify-center text-xs tracking-[0.5px]"
+                  disabled={!isConnected || grantPermit.isPending || !isLive}
+                  className="btn btn-secondary w-full"
                 >
-                  {grantPermit.isPending ? "AUTHORIZING..." : "GRANT DECRYPT PERMIT"}
+                  <KeyRound className="h-4 w-4" />
+                  {grantPermit.isPending ? "Authorizing…" : "Grant Decrypt Permit"}
                 </button>
-              </div>
-            </div>
-
-            <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm border-t border-[#252528] pt-6">
-              <div>
-                <div className="text-[#a1a1aa] text-xs tracking-widest">STRATEGIES</div>
-                <div className="mt-1 text-3xl font-medium tabular-nums">{STRATEGIES.length}</div>
-              </div>
-              <div>
-                <div className="text-[#a1a1aa] text-xs tracking-widest">POSITIONS</div>
-                <div className="mt-1 text-3xl font-medium tabular-nums">{positions.length}</div>
-              </div>
-              <div>
-                <div className="text-[#a1a1aa] text-xs tracking-widest">SECURITY</div>
-                <div className="mt-1 text-[#c5a26f] font-medium">FHE ENCRYPTED</div>
-              </div>
-              <div>
-                <div className="text-[#a1a1aa] text-xs tracking-widest">STATUS</div>
-                <div className="mt-1 text-[#c5a26f] font-medium">OPERATIONAL</div>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-          {/* Positions / Treasury */}
-          <div className="xl:col-span-7">
-            <div className="flex items-center justify-between px-1 mb-3">
-              <div className="text-xs tracking-[1.5px] text-[#a1a1aa]">POSITIONS</div>
-              <div className="text-[10px] text-[#a1a1aa]">Encrypted • on-chain</div>
-            </div>
-
-            <div className="space-y-3">
-              {positions.length === 0 && (
-                <div className="premium-card p-8 text-center text-sm text-[#a1a1aa]">
-                  No positions yet.<br />Deposit to create your first encrypted holding.
+                <div className="mt-1 flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--inset)] px-3 py-2 text-[11px]">
+                  <span className="text-[var(--text-faint)]">KMS path</span>
+                  {decryptionInputs.length > 0 ? (
+                    <span className="text-[var(--live)]">Ready</span>
+                  ) : (
+                    <span className="text-[var(--text-muted)]">Awaiting handle</span>
+                  )}
                 </div>
-              )}
+              </div>
+            </div>
 
-              {positions.length > 0 && <CastleMap positions={positions} />}
-
-              {onChainSharesHandle && (
-                <div className="premium-card flex items-center justify-between border border-[#c5a26f]/20 bg-[#131315] px-6 py-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-11 w-11 items-center justify-center rounded bg-[#c5a26f]/10 font-mono text-sm tracking-tighter border border-[#c5a26f]/20 text-[#c5a26f]">
-                      ON
-                    </div>
-                    <div>
-                      <div className="font-medium">On-chain position</div>
-                      <div className="text-xs text-[#a1a1aa] font-mono mt-0.5">
-                        {String(onChainSharesHandle).slice(0, 12)}…{String(onChainSharesHandle).slice(-8)}
-                      </div>
-                    </div>
-                    <div className="pill pill-gold">LIVE</div>
+            {/* Stat rail */}
+            <div className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--border)] sm:grid-cols-4">
+              {[
+                { label: "Strategies", value: String(STRATEGIES.length), gold: false },
+                { label: "Positions", value: String(positions.length), gold: false },
+                { label: "Security", value: "FHE Encrypted", gold: true },
+                { label: "Status", value: isLive ? "Live" : "Operational", gold: true },
+              ].map((s) => (
+                <div key={s.label} className="bg-[var(--card)] px-4 py-4">
+                  <div className="eyebrow">{s.label}</div>
+                  <div className={`mt-1.5 tabular-nums ${s.gold ? "text-[15px] font-medium text-[var(--gold-bright)]" : "text-2xl font-semibold"}`}>
+                    {s.value}
                   </div>
-                  <button
-                    onClick={() => { navigator.clipboard.writeText(String(onChainSharesHandle)); toast.success("Handle copied"); }}
-                    className="btn btn-secondary text-xs"
-                  >
-                    COPY
-                  </button>
                 </div>
-              )}
-
-              <AnimatePresence>
-              {positions.map((pos, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 8, scale: 0.985 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -6, scale: 0.98 }}
-                  transition={{ 
-                    duration: 0.22, 
-                    ease: [0.23, 1, 0.32, 1],
-                    delay: i * 0.03 
-                  }}
-                  whileHover={{ scale: 1.002 }}
-                  className="premium-card flex items-center justify-between px-6 py-5"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-11 w-11 items-center justify-center rounded bg-[#1f1f22] font-mono text-sm tracking-tighter border border-[#252528]">
-                      {pos.token}
-                    </div>
-                    <div>
-                      <div className="font-medium">{pos.token} Position</div>
-                      <div className="text-xs text-[#a1a1aa] font-mono mt-0.5">{pos.handle}</div>
-                    </div>
-                    <div className="pill pill-gold">ENCRYPTED</div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleDecryptPosition(i)}
-                      disabled={decrypting}
-                      className="btn btn-secondary text-xs"
-                    >
-                      <Eye className="h-3.5 w-3.5" /> DECRYPT
-                    </button>
-                    <button
-                      onClick={() => handleWithdraw(i)}
-                      className="btn btn-secondary text-xs hover:border-red-500/40 hover:text-red-400"
-                    >
-                      <ArrowDownToLine className="h-4 w-4" /> WITHDRAW
-                    </button>
-                  </div>
-                </motion.div>
               ))}
-              </AnimatePresence>
+            </div>
+          </div>
+        </section>
 
-              {/* Dense blotter table for pros */}
-              {positions.length > 0 && (
-                <div className="mt-4 overflow-x-auto text-xs font-mono border border-[#252528] rounded-xl blotter">
-                  <table className="w-full">
-                    <thead className="text-[#a1a1aa]">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+          {/* Positions */}
+          <div className="xl:col-span-7">
+            <div className="mb-3 flex items-center justify-between px-0.5">
+              <span className="eyebrow">Positions{positions.length > 0 ? ` · ${positions.length}` : ""}</span>
+              <span className="text-[11px] text-[var(--text-faint)]">Encrypted · on-chain</span>
+            </div>
+
+            <div className="premium-card overflow-hidden">
+              {(positions.length > 0 || onChainSharesHandle) ? (
+                <div className="overflow-x-auto">
+                  <table className="blotter">
+                    <thead>
                       <tr>
-                        <th className="text-left p-3">ASSET</th>
-                        <th className="text-right p-3">HANDLE</th>
-                        <th className="text-right p-3">STATUS</th>
+                        <th className="text-left">Asset</th>
+                        <th className="text-left">Ciphertext Handle</th>
+                        <th className="text-left">Status</th>
+                        <th className="text-right">Action</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {positions.map((pos, i) => (
-                        <tr key={i} className="border-t border-[#252528]">
-                          <td className="p-3">{pos.token}</td>
-                          <td className="p-3 text-right text-white/60">{pos.handle}</td>
-                          <td className="p-3 text-right text-[#c5a26f]">ENCRYPTED</td>
+                      {onChainSharesHandle && (
+                        <tr>
+                          <td>
+                            <div className="flex items-center gap-2.5">
+                              <span className="flex h-7 w-7 items-center justify-center rounded-md border border-[rgba(70,201,139,0.3)] bg-[var(--live-dim)] font-mono text-[10px] text-[var(--live)]">ON</span>
+                              <span className="font-medium text-[var(--text)]">On-chain</span>
+                            </div>
+                          </td>
+                          <td className="font-mono text-[var(--text-muted)]">{String(onChainSharesHandle).slice(0, 12)}…{String(onChainSharesHandle).slice(-8)}</td>
+                          <td><span className="pill pill-green"><span className="dot dot-live" />Live</span></td>
+                          <td className="text-right">
+                            <button onClick={() => copyText(String(onChainSharesHandle), "Handle copied")} className="btn btn-secondary px-2.5 py-1 text-[11px]"><Copy className="h-3 w-3" /> Copy</button>
+                          </td>
                         </tr>
-                      ))}
+                      )}
+                      <AnimatePresence>
+                        {positions.map((pos, i) => (
+                          <motion.tr
+                            key={pos.rawHandle ? String(pos.rawHandle) : i}
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -4 }}
+                            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1], delay: i * 0.03 }}
+                          >
+                            <td>
+                              <div className="flex items-center gap-2.5">
+                                <span className="flex h-7 w-7 items-center justify-center rounded-md border border-[var(--border-strong)] bg-[var(--card-2)] font-mono text-[10px]">{pos.token.slice(0, 2)}</span>
+                                <span className="font-medium text-[var(--text)]">{pos.token} Position</span>
+                              </div>
+                            </td>
+                            <td className="font-mono text-[var(--text-muted)]">{pos.handle}</td>
+                            <td><span className="pill pill-gold"><span className="dot dot-gold" />Encrypted</span></td>
+                            <td>
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button onClick={() => handleDecryptPosition(i)} disabled={decrypting} className="btn btn-secondary px-2.5 py-1 text-[11px]"><Eye className="h-3 w-3" /> Decrypt</button>
+                                <button onClick={() => handleWithdraw(i)} className="btn btn-secondary btn-danger px-2.5 py-1 text-[11px]"><ArrowDownToLine className="h-3.5 w-3.5" /> Withdraw</button>
+                              </div>
+                            </td>
+                          </motion.tr>
+                        ))}
+                      </AnimatePresence>
                     </tbody>
                   </table>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--inset)]"><Lock className="h-4 w-4 text-[var(--text-faint)]" /></span>
+                  <div className="text-[15px] font-medium">No positions yet</div>
+                  <div className="max-w-xs text-[13px] text-[var(--text-muted)]">Seal a deposit to create your first encrypted holding. Balances never leave the ciphertext domain.</div>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Deposit / Armory */}
+          {/* Deposit */}
           <div className="xl:col-span-5">
-            <div className="px-1 mb-3">
-              <div className="text-xs tracking-[1.5px] text-[#a1a1aa]">DEPOSIT</div>
+            <div className="mb-3 flex items-center justify-between px-0.5">
+              <span className="eyebrow">Deposit</span>
+              <span className={`pill ${isLive ? "pill-green" : "pill-demo"}`}><span className={`dot ${isLive ? "dot-live" : "dot-demo"}`} />{isLive ? "Live" : "Demo"}</span>
             </div>
 
-            <motion.div
-              whileHover={{ scale: 1.001 }}
-              transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-              className="premium-card p-6"
-            >
-              <div className="text-xs text-[#a1a1aa] mb-2 tracking-widest">STRATEGY</div>
-
+            <div className="premium-card p-5 md:p-6">
+              <div className="eyebrow mb-2">Strategy</div>
               {STRATEGIES.map((s) => (
                 <button
                   key={s.id}
                   onClick={() => setSelectedStrategy(s)}
-                  className={`w-full text-left mb-2 rounded-xl border p-4 transition-all ${selectedStrategy.id === s.id ? "border-[#c5a26f]/40 bg-[#1a1814]" : "border-[#252528] hover:border-[#333]"}`}
+                  className={`mb-2 w-full rounded-xl border p-4 text-left transition-all ${selectedStrategy.id === s.id ? "border-[var(--gold-line)] bg-[var(--gold-dim)]" : "border-[var(--border)] hover:border-[var(--border-strong)]"}`}
                 >
-                  <div className="flex justify-between font-medium">
+                  <div className="flex items-center justify-between font-medium">
                     <span>{s.name}</span>
-                    <span className="text-[#c5a26f] text-sm tabular-nums">{s.apy}</span>
+                    <span className="tabular-nums text-sm text-[var(--gold-bright)]">{s.apy}</span>
                   </div>
-                  <div className="text-sm text-[#a1a1aa] mt-1 leading-snug">{s.description}</div>
+                  <div className="mt-1 text-[13px] leading-snug text-[var(--text-muted)]">{s.description}</div>
                 </button>
               ))}
 
               <div className="mt-5">
-                <div className="text-xs text-[#a1a1aa] mb-1.5 tracking-widest">AMOUNT</div>
-                <div className="flex items-center rounded-xl border border-[#252528] bg-[#0f0f11] px-4 py-3">
+                <div className="eyebrow mb-1.5">Amount</div>
+                <div className="field px-4 py-3">
                   <input
                     type="number"
                     value={depositAmount}
                     onChange={(e) => setDepositAmount(e.target.value)}
                     placeholder="0.00"
-                    className="flex-1 bg-transparent text-3xl font-medium placeholder:text-[#555] focus:outline-none tabular-nums"
+                    className="min-w-0 flex-1 bg-transparent text-3xl font-medium tabular-nums placeholder:text-[var(--text-faint)] focus:outline-none"
                   />
-                  <div className="pl-3 text-sm text-[#a1a1aa]">{selectedStrategy.token}</div>
+                  <span className="pl-3 text-sm text-[var(--text-muted)]">{selectedStrategy.token}</span>
                 </div>
               </div>
 
               <div className="mt-4">
-                <div className="flex items-center justify-between text-xs text-[#a1a1aa] mb-1.5 tracking-widest">
-                  <span>VAULT ADDRESS (Sepolia)</span>
-                  {!vaultAddress.includes("YourDeployed") ? (
-                    <span className="text-[#c5a26f]">LIVE</span>
-                  ) : (
-                    <span className="text-amber-400">DEMO</span>
-                  )}
+                <div className="mb-1.5 flex items-center justify-between">
+                  <span className="eyebrow">Vault Address · Sepolia</span>
+                  <span className={isLive ? "text-[11px] text-[var(--live)]" : "text-[11px] text-[var(--demo)]"}>{isLive ? "Connected" : "Not set"}</span>
                 </div>
                 <input
                   value={vaultAddress}
                   onChange={(e) => setVaultAddress(e.target.value)}
                   className="input w-full font-mono text-xs"
-                  placeholder="0xYourVault..."
+                  placeholder="0xYourVault…"
                 />
-                <div className="mt-1 text-[10px] text-[#a1a1aa]">Deploy with pnpm deploy:sepolia then paste the address.</div>
+                <div className="mt-1.5 text-[11px] text-[var(--text-faint)]">Deploy with <span className="font-mono text-[var(--text-muted)]">pnpm deploy:sepolia</span>, then paste the address to go live.</div>
               </div>
 
-              {/* Test assets */}
-              <div className="mt-3 rounded-xl border border-[#252528] bg-[#0f0f11] p-3 text-xs">
-                <div className="uppercase tracking-[1.5px] text-[10px] text-[#a1a1aa] mb-1.5">TEST ASSETS</div>
-                <div className="space-y-1 font-mono text-[11px]">
+              <div className="card-inset mt-3 p-3">
+                <div className="eyebrow mb-2">Test Assets</div>
+                <div className="space-y-1.5 font-mono text-[11px]">
                   <div className="flex items-center justify-between">
-                    <span className="text-[#c5a26f]">cUSDC</span>
-                    <button onClick={() => { navigator.clipboard.writeText(C_USDC_MOCK); toast.success("Copied"); }} className="btn btn-secondary text-[10px] px-2 py-px">
-                      {C_USDC_MOCK.slice(0,6)}… COPY
-                    </button>
+                    <span className="text-[var(--gold-bright)]">cUSDC</span>
+                    <button onClick={() => copyText(C_USDC_MOCK)} className="btn btn-secondary px-2 py-0.5 text-[10px]">{C_USDC_MOCK.slice(0, 6)}… <Copy className="h-3 w-3" /></button>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-[#c5a26f]">Registry</span>
-                    <button onClick={() => { navigator.clipboard.writeText(WRAPPERS_REGISTRY); toast.success("Copied"); }} className="btn btn-secondary text-[10px] px-2 py-px">
-                      {WRAPPERS_REGISTRY.slice(0,6)}… COPY
-                    </button>
+                    <span className="text-[var(--gold-bright)]">Registry</span>
+                    <button onClick={() => copyText(WRAPPERS_REGISTRY)} className="btn btn-secondary px-2 py-0.5 text-[10px]">{WRAPPERS_REGISTRY.slice(0, 6)}… <Copy className="h-3 w-3" /></button>
                   </div>
                 </div>
               </div>
@@ -725,74 +669,76 @@ export default function Celano() {
               <button
                 onClick={handleShieldAndDeposit}
                 disabled={!isConnected || isDepositing || !depositAmount || isWritePending}
-                className="btn btn-primary mt-4 w-full justify-center py-3.5"
+                className="btn btn-primary mt-4 w-full py-3.5"
               >
                 <Shield className="h-4 w-4" />
-                {isDepositing || isWritePending ? "SEALING..." : "SEAL & DEPOSIT"}
+                {isDepositing || isWritePending ? "Sealing…" : "Seal & Deposit"}
               </button>
 
-              <div className="mt-3 text-center text-[10px] text-[#a1a1aa]">
-                Real FHE. Ciphertext only.
+              <div className="mt-3 flex items-center justify-center gap-2 text-[11px] text-[var(--text-faint)]">
+                <Lock className="h-3 w-3" /> Real FHE · ciphertext only
               </div>
-
-              <div className="mt-3 flex justify-center">
-                <LiveTx hash={lastTxHash} />
-              </div>
-            </motion.div>
+              {lastTxHash && <div className="mt-3 flex justify-center"><LiveTx hash={lastTxHash} /></div>}
+            </div>
           </div>
         </div>
 
         {/* Ledger */}
         {(activities.length > 0 || lastTxHash) && (
-          <div className="mt-8">
-            <div className="flex items-center justify-between px-1 mb-2">
-              <div className="text-xs tracking-[1.5px] text-[#a1a1aa]">LEDGER</div>
-              <div className="text-[10px] text-[#a1a1aa]">Activity</div>
+          <section className="mt-6">
+            <div className="mb-3 flex items-center justify-between px-0.5">
+              <span className="eyebrow flex items-center gap-1.5"><Activity className="h-3 w-3" /> Ledger</span>
+              <span className="text-[11px] text-[var(--text-faint)]">Session activity</span>
             </div>
-            <div className="premium-card p-4 text-xs font-mono space-y-1.5 max-h-[148px] overflow-auto">
-              {activities.length === 0 && (
-                <div className="text-[#a1a1aa]">No activity yet.</div>
-              )}
-              {activities.map((a, idx) => (
-                <div key={idx} className="flex items-start gap-3 text-[#a1a1aa]">
-                  <span className="text-[#c5a26f]/70 w-16 shrink-0">{a.time}</span>
-                  <span className="font-medium text-[#f4f4f5]/90 w-36 shrink-0">{a.action}</span>
-                  <span className="text-[#a1a1aa] flex-1 truncate">{a.detail}</span>
-                  {a.tx && <LiveTx hash={a.tx} />}
+            <div className="premium-card scroll-slim max-h-[172px] overflow-auto p-2">
+              {activities.length === 0 ? (
+                <div className="px-3 py-4 text-[13px] text-[var(--text-muted)]">No activity yet.</div>
+              ) : (
+                <div className="divide-y divide-[var(--hairline)]">
+                  {activities.map((a, idx) => (
+                    <div key={idx} className="flex items-center gap-3 px-3 py-2 font-mono text-[11px]">
+                      <span className="w-16 shrink-0 text-[var(--text-faint)]">{a.time}</span>
+                      <span className="w-40 shrink-0 font-medium text-[var(--gold-bright)]">{a.action}</span>
+                      <span className="flex-1 truncate text-[var(--text-muted)]">{a.detail}</span>
+                      {a.tx && <LiveTx hash={a.tx} />}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
-          </div>
+          </section>
         )}
 
         {/* How it works — quiet, factual */}
-        <div className="mt-14 border-t border-[#252528] pt-8 text-sm text-[#a1a1aa] max-w-3xl">
-          <div className="uppercase tracking-[2px] text-xs text-[#a1a1aa] mb-3">HOW IT WORKS</div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6 text-sm">
-            <div>
-              <div className="font-medium text-[#f4f4f5]">1. Encrypt</div>
-              <div className="mt-1">Deposit flows through ERC-7984. Your balance becomes ciphertext (euint64).</div>
-            </div>
-            <div>
-              <div className="font-medium text-[#f4f4f5]">2. Vault</div>
-              <div className="mt-1">confidentialTransferAndCall moves only encrypted data into the vault contract.</div>
-            </div>
-            <div>
-              <div className="font-medium text-[#f4f4f5]">3. Decrypt</div>
-              <div className="mt-1">You alone request KMS decryption via grant + permit. Nothing is public.</div>
-            </div>
+        <section className="mt-14 border-t border-[var(--border)] pt-8">
+          <div className="eyebrow mb-4">How It Works</div>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {[
+              { n: "01", t: "Encrypt", d: "Deposit flows through ERC-7984. Your balance becomes ciphertext (euint64) client-side before it ever touches the chain." },
+              { n: "02", t: "Vault", d: "confidentialTransferAndCall moves only encrypted data into the vault contract, which implements IERC7984Receiver." },
+              { n: "03", t: "Decrypt", d: "You alone request KMS decryption via grant + EIP-712 permit. Nothing about your position is ever public." },
+            ].map((step) => (
+              <div key={step.n} className="premium-card p-5">
+                <div className="font-mono text-[13px] text-[var(--gold)]">{step.n}</div>
+                <div className="mt-2 text-[15px] font-medium">{step.t}</div>
+                <div className="mt-1.5 text-[13px] leading-relaxed text-[var(--text-muted)]">{step.d}</div>
+              </div>
+            ))}
           </div>
-        </div>
+        </section>
       </div>
 
       {/* Footer status */}
-      <div className="mx-auto max-w-7xl px-6 md:px-8 mt-10 border-t border-[#252528] pt-5 pb-10 text-[10px] font-mono tracking-[1px] text-[#a1a1aa] flex flex-wrap gap-x-6 gap-y-1">
-        <div>CELANO</div>
-        <div>ZAMA FHEVM</div>
-        <div>SEPOLIA</div>
-        <div>ERC-7984 • euint64</div>
-        <div>{isConnected ? "CONNECTED" : "DISCONNECTED"}</div>
-      </div>
+      <footer className="mx-auto mt-10 flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-2 border-t border-[var(--border)] px-5 pb-10 pt-6 font-mono text-[10px] tracking-[0.08em] text-[var(--text-faint)] md:px-8">
+        <span className="text-[var(--text-muted)]">CELANO</span>
+        <span>ZAMA FHEVM</span>
+        <span>SEPOLIA</span>
+        <span>ERC-7984 · euint64</span>
+        <span className="ml-auto inline-flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: isConnected ? "var(--live)" : "var(--text-faint)" }} />
+          {isConnected ? "CONNECTED" : "DISCONNECTED"}
+        </span>
+      </footer>
     </div>
   );
 }

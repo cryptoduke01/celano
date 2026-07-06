@@ -41,8 +41,8 @@ const ebGaramond = EB_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Celano — The Castle | Private Yield on Zama",
-  description: "Celano. The historic castle that guards your encrypted yield. Shield. Enter the keep. Only you can decrypt. Built with Zama FHE for the Builder Track.",
+  title: "Celano — Confidential Yield Treasury on Zama",
+  description: "Encrypted on-chain positions with real composable privacy. Deposit through ERC-7984, hold ciphertext, and decrypt only when you choose via Zama KMS. Built on Zama FHEVM.",
   icons: {
     icon: '/icon',
     apple: '/apple-icon',

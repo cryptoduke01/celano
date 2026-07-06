@@ -1,45 +1,122 @@
 @import "tailwindcss";
 
+/* ============================================================================
+   CELANO — DESIGN SYSTEM
+   Confidential yield treasury. Institutional dark, single warm-gold accent.
+   North star: Morpho / Gauntlet / prop-desk internal tools — quiet, precise,
+   data-dense, trustworthy. Every value is scannable; nothing decorative shouts.
+   ========================================================================== */
+
 :root {
+  /* Fonts (wired via next/font in layout.tsx) */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-space-grotesk);
   --font-brand: var(--font-cinzel);
 
-  /* Premium dark treasury palette (inspired by institutional DeFi) */
-  --bg: #0b0b0c;
+  /* --- Surfaces (elevation goes lighter as it comes forward) --- */
+  --bg: #0a0a0b;
+  --bg-elevated: #0e0e10;
   --card: #131315;
-  --card-border: #252528;
+  --card-2: #17171b;
+  --inset: #0c0c0e; /* recessed fields */
+
+  /* --- Lines --- */
+  --border: #212125;
+  --border-strong: #2c2c31;
+  --hairline: rgba(255, 255, 255, 0.055);
+
+  /* --- Text --- */
   --text: #f4f4f5;
-  --text-muted: #a1a1aa;
+  --text-muted: #9a9aa3;
+  --text-faint: #66666e;
+
+  /* --- Accent: a single warm gold does the load-bearing work --- */
   --gold: #c5a26f;
-  --gold-bright: #e8d5a3;
-  --accent: #c5a26f;
-  --success: #22c55e;
-  --warning: #eab308;
+  --gold-bright: #e3c98f;
+  --gold-dim: rgba(197, 162, 111, 0.14);
+  --gold-line: rgba(197, 162, 111, 0.32);
+
+  /* --- Semantic (used sparingly, never competing with gold) --- */
+  --live: #46c98b; /* verified / on-chain / KMS-real */
+  --live-dim: rgba(70, 201, 139, 0.13);
+  --demo: #d3a24a; /* demo / not-yet-live */
+  --demo-dim: rgba(211, 162, 74, 0.13);
+  --danger: #e5646b;
+
+  /* --- Motion — Emil discipline: strong curves, short for feedback --- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-strong: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+  --dur-fast: 130ms;
+  --dur: 180ms;
+  --dur-slow: 260ms;
+
+  /* --- Elevation --- */
+  --shadow-1: 0 1px 0 rgba(255, 255, 255, 0.02) inset, 0 8px 26px -18px rgba(0, 0, 0, 0.8);
+  --shadow-2: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 18px 44px -22px rgba(0, 0, 0, 0.85);
+}
+
+* {
+  border-color: var(--border);
 }
 
 body {
   font-family: var(--font-geist-sans);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* Typography — restrained pairings */
+.dark { color-scheme: dark; }
+
+/* Whole-page ambient: barely-there vertical warmth, no gradients screaming */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(120% 60% at 50% -10%, rgba(197, 162, 111, 0.05), transparent 60%);
+}
+
+/* ============================ TYPOGRAPHY ============================ */
+
 h1, h2, .section-title {
   font-family: var(--font-space-grotesk);
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
 .brand-heading,
 .logotype {
   font-family: var(--font-cinzel);
   font-weight: 600;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.01em;
 }
 
-.data-value {
+/* Eyebrow / micro-label — the connective tissue of a dense tool */
+.eyebrow {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  font-feature-settings: "tnum";
+}
+
+.tnum,
+.data-value,
+.data-dense {
   font-feature-settings: "tnum" "lnum";
   font-variant-numeric: tabular-nums;
+}
+
+.mono {
+  font-family: var(--font-geist-mono);
+  font-feature-settings: "tnum";
 }
 
 .whitepaper-body,
@@ -48,194 +125,288 @@ h1, h2, .section-title {
   font-size: 17px;
   line-height: 1.78;
 }
-
 .whitepaper-body h1,
-.whitepaper-body h2 {
-  font-family: var(--font-space-grotesk);
-}
+.whitepaper-body h2 { font-family: var(--font-space-grotesk); }
 
-/* Base */
-.dark {
-  color-scheme: dark;
-}
+/* ============================ SURFACES / CARDS ============================ */
 
-/* Premium cards — clean, quiet luxury matching reference screenshots */
-.premium-card {
-  background: var(--card);
-  border: 1px solid var(--card-border);
-  border-radius: 16px;
-  transition: border-color 0.15s cubic-bezier(0.22, 1, 0.36, 1), 
-              transform 0.15s cubic-bezier(0.22, 1, 0.36, 1),
-              box-shadow 0.15s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.premium-card:hover {
-  border-color: rgba(197, 162, 111, 0.25);
-  transform: translateY(-1px);
-  box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.6);
-}
-
-.premium-card .value {
-  color: var(--gold-bright);
-  font-feature-settings: "tnum" "lnum";
-}
-
-/* Gold accent line on primary treasury surfaces */
-.gold-accent {
+.premium-card,
+.institutional-card {
   position: relative;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent 42%),
+    var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-1);
+  transition:
+    border-color var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out);
 }
+.premium-card:hover,
+.institutional-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-2);
+}
+
+/* Primary treasury surface — gets the quiet gold hairline crown */
+.gold-accent { position: relative; overflow: hidden; }
 .gold-accent::before {
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 1px;
-  background: linear-gradient(to right, transparent, var(--gold), transparent);
-  opacity: 0.6;
+  background: linear-gradient(to right, transparent, var(--gold-line), transparent);
 }
 
-/* Clean institutional table (ledger / blotter) */
-.blotter {
-  font-feature-settings: "tnum";
-  border-collapse: collapse;
-}
-.blotter th {
-  font-weight: 500;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--card-border);
-}
-.blotter td {
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-}
-.blotter tr:last-child td {
-  border-bottom: none;
+.card-inset {
+  background: var(--inset);
+  border: 1px solid var(--border);
+  border-radius: 12px;
 }
 
-/* Buttons — no slop, precise */
+/* ============================ BUTTONS ============================ */
+
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 18px;
+  padding: 10px 16px;
   border-radius: 10px;
   font-weight: 600;
-  font-size: 14px;
-  transition: all 0.15s cubic-bezier(0.22, 1, 0.36, 1);
+  font-size: 13.5px;
+  letter-spacing: 0.01em;
+  line-height: 1;
   cursor: pointer;
   border: 1px solid transparent;
+  white-space: nowrap;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
 }
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+.btn:disabled { opacity: 0.42; cursor: not-allowed; }
 
 .btn-primary {
-  background: var(--gold);
-  color: #0b0b0c;
-  border-color: var(--gold);
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  color: #17130b;
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 6px 18px -10px rgba(197, 162, 111, 0.55);
 }
 .btn-primary:hover:not(:disabled) {
-  background: var(--gold-bright);
-  border-color: var(--gold-bright);
+  filter: brightness(1.05);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) inset, 0 10px 24px -10px rgba(197, 162, 111, 0.7);
 }
-.btn-primary:active:not(:disabled) {
-  transform: scale(0.985);
-}
+.btn-primary:active:not(:disabled) { transform: translateY(0.5px) scale(0.99); }
 
 .btn-secondary {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.02);
   color: var(--text);
-  border-color: var(--card-border);
+  border-color: var(--border-strong);
 }
 .btn-secondary:hover:not(:disabled) {
-  border-color: var(--gold);
-  color: var(--gold);
+  border-color: var(--gold-line);
+  color: var(--gold-bright);
+  background: var(--gold-dim);
 }
-.btn-secondary:active:not(:disabled) {
-  transform: scale(0.985);
-}
+.btn-secondary:active:not(:disabled) { transform: scale(0.99); }
 
 .btn-ghost {
   background: transparent;
   color: var(--text-muted);
   border-color: transparent;
 }
-.btn-ghost:hover:not(:disabled) {
-  color: var(--text);
-  background: rgba(255,255,255,0.03);
+.btn-ghost:hover:not(:disabled) { color: var(--text); background: rgba(255, 255, 255, 0.04); }
+
+.btn-danger:hover:not(:disabled) {
+  border-color: rgba(229, 100, 107, 0.4);
+  color: var(--danger);
+  background: rgba(229, 100, 107, 0.08);
 }
 
-/* Inputs */
+/* ============================ INPUTS ============================ */
+
 .input {
-  background: #0f0f11;
-  border: 1px solid var(--card-border);
+  background: var(--inset);
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 12px 14px;
-  font-size: 15px;
+  font-size: 14px;
   color: var(--text);
   font-feature-settings: "tnum";
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
 }
 .input:focus {
   outline: none;
-  border-color: var(--gold);
+  border-color: var(--gold-line);
+  box-shadow: 0 0 0 3px rgba(197, 162, 111, 0.12);
+}
+.input::placeholder { color: var(--text-faint); }
+
+.field {
+  display: flex;
+  align-items: center;
+  background: var(--inset);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.field:focus-within {
+  border-color: var(--gold-line);
   box-shadow: 0 0 0 3px rgba(197, 162, 111, 0.1);
 }
-.input::placeholder {
-  color: var(--text-muted);
-}
 
-/* Status / pills */
+/* ============================ PILLS / CHIPS ============================ */
+
 .pill {
   display: inline-flex;
   align-items: center;
-  padding: 2px 9px;
+  gap: 5px;
+  padding: 3px 9px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1;
 }
-.pill-gold {
-  background: rgba(197,162,111,0.12);
-  color: var(--gold-bright);
-  border: 1px solid rgba(197,162,111,0.25);
-}
-.pill-green {
-  background: rgba(34,197,94,0.12);
-  color: #4ade80;
-  border: 1px solid rgba(34,197,94,0.3);
+.pill-gold  { background: var(--gold-dim); color: var(--gold-bright); border: 1px solid var(--gold-line); }
+.pill-green { background: var(--live-dim); color: var(--live); border: 1px solid rgba(70, 201, 139, 0.32); }
+.pill-demo  { background: var(--demo-dim); color: var(--demo); border: 1px solid rgba(211, 162, 74, 0.3); }
+.pill-muted { background: rgba(255, 255, 255, 0.03); color: var(--text-muted); border: 1px solid var(--border-strong); }
+
+/* Status dot inside a pill/chip */
+.dot { height: 6px; width: 6px; border-radius: 999px; flex: none; }
+.dot-gold  { background: var(--gold); }
+.dot-live  { background: var(--live); box-shadow: 0 0 0 3px var(--live-dim); }
+.dot-demo  { background: var(--demo); }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
-/* Subtle dividers */
+/* ============================ TABLE / BLOTTER ============================ */
+
+.blotter {
+  font-feature-settings: "tnum";
+  border-collapse: collapse;
+  width: 100%;
+}
+.blotter th {
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.blotter td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 12px;
+}
+.blotter tbody tr { transition: background var(--dur-fast) var(--ease-out); }
+.blotter tbody tr:hover { background: rgba(255, 255, 255, 0.018); }
+.blotter tr:last-child td { border-bottom: none; }
+
+/* ============================ DIVIDERS ============================ */
+
 .hairline {
   height: 1px;
-  background: linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent);
+  background: linear-gradient(to right, transparent, var(--hairline), transparent);
+}
+.divider { height: 1px; background: var(--border); }
+
+/* ============================ ENCRYPTED / DECRYPT THEATER ============================ */
+
+/* Masked value shimmer — reads as "sealed ciphertext", not a spinner */
+.mask-shimmer {
+  background: linear-gradient(100deg, var(--text-faint) 30%, var(--gold) 50%, var(--text-faint) 70%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: mask-slide 2.6s linear infinite;
+}
+@keyframes mask-slide {
+  0% { background-position: 130% 0; }
+  100% { background-position: -30% 0; }
 }
 
-/* Number ticker feel */
-.yield {
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum";
+/* Value reveal — brief blur→clear when plaintext arrives from KMS */
+.value-reveal { animation: reveal var(--dur-slow) var(--ease-out-strong); }
+@keyframes reveal {
+  from { filter: blur(9px); opacity: 0.2; transform: translateY(2px); }
+  to   { filter: blur(0); opacity: 1; transform: translateY(0); }
 }
 
-/* Reduce decorative noise globally — tasteful restraint */
-.castle-battlements,
-.ascii-dots,
-.dot-grid,
-.castle-stone {
-  /* kept for very limited use in mark or optional map only */
-  opacity: 0.6;
+/* Skeleton shimmer for loading states */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+  animation: shimmer 1.4s var(--ease-in-out) infinite;
+}
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+
+/* Live status pulse (used behind on-chain "LIVE" dots) */
+.pulse::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 999px;
+  background: var(--live);
+  opacity: 0.35;
+  animation: pulse 2s var(--ease-out) infinite;
+}
+@keyframes pulse {
+  0% { transform: scale(0.7); opacity: 0.4; }
+  70% { transform: scale(1.6); opacity: 0; }
+  100% { opacity: 0; }
 }
 
-/* Motion discipline: respect reduced motion */
+/* ============================ SCROLLBAR ============================ */
+
+.scroll-slim::-webkit-scrollbar { width: 8px; height: 8px; }
+.scroll-slim::-webkit-scrollbar-track { background: transparent; }
+.scroll-slim::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.scroll-slim::-webkit-scrollbar-thumb:hover { background: #3a3a40; background-clip: padding-box; }
+
+/* Legacy decorative hooks (kept minimal for docs/whitepaper compatibility) */
+.ascii-dots { opacity: 0.5; }
+
+/* ============================ MOTION DISCIPLINE ============================ */
+
 @media (prefers-reduced-motion: reduce) {
-  .premium-card,
-  .btn,
-  .input {
-    transition: none !important;
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }

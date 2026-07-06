@@ -1,21 +1,24 @@
 "use client";
 
-// Clean vault status indicator. No emojis. Subtle, institutional.
+// Confidential-state indicator. Neutral, institutional — no theatrics.
 
 export function VaultDoor({ state = "closed" }: { state?: "closed" | "sealing" | "open" }) {
-  const isSealing = state === "sealing";
-  const label = state === "open" ? "VAULT OPEN" : state === "sealing" ? "SEALING" : "SECURED";
-  const tone = state === "open" ? "text-emerald-400" : state === "sealing" ? "text-amber-400" : "text-[#c5a26f]";
+  const label = state === "open" ? "UNSEALED" : state === "sealing" ? "SEALING" : "SEALED";
+  const color =
+    state === "open" ? "var(--live)" : state === "sealing" ? "var(--demo)" : "var(--gold)";
 
   return (
-    <div className="mx-auto my-3 flex w-fit items-center gap-3 rounded-full border border-[#252528] bg-[#111113] px-4 py-1.5">
-      <div className={`h-1.5 w-1.5 rounded-full ${state === "open" ? "bg-emerald-400" : state === "sealing" ? "bg-amber-400 animate-pulse" : "bg-[#c5a26f]"}`} />
-      <div className={`font-mono text-[10px] tracking-[3px] ${tone}`}>
+    <div
+      className="inline-flex w-fit items-center gap-2.5 rounded-full border px-3 py-1.5"
+      style={{ borderColor: "var(--border)", background: "var(--bg-elevated)" }}
+    >
+      <span
+        className={`h-1.5 w-1.5 rounded-full ${state === "sealing" ? "animate-pulse" : ""}`}
+        style={{ background: color }}
+      />
+      <span className="font-mono text-[10px] tracking-[0.24em]" style={{ color }}>
         {label}
-      </div>
-      {isSealing && (
-        <div className="h-px w-6 bg-[#c5a26f]/40" />
-      )}
+      </span>
     </div>
   );
 }
