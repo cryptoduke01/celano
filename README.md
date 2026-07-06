@@ -11,6 +11,8 @@ Only you can see inside.
 
 Industry-grade dark UI. Castle architecture. Dotted fortress patterns. Real Zama FHE.
 
+Branding: Custom castle "C" monogram (battlements) used as favicon, apple icon, and throughout the interface.
+
 Built for Zama Developer Program Mainnet Season 3 — Builder Track.
 
 Built for the Zama Developer Program — Mainnet Season 3 (Builder Track).
