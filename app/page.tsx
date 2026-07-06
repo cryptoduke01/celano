@@ -406,8 +406,11 @@ export default function Celano() {
             <Link href="/docs" className="underline decoration-white/30 hover:decoration-white">The Gates</Link>
           </div>
 
-          <div className="mt-7">
-            <ASCIICastle size="lg" />
+          <div className="mt-7 flex flex-col items-center">
+            <CastleMark size={72} />
+            <div className="mt-3">
+              <ASCIICastle size="lg" />
+            </div>
             <CastleMapDots className="mt-1" />
           </div>
 
