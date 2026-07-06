@@ -452,14 +452,17 @@ export default function Celano() {
                 )}
               </div>
 
-              <button
+                <button
                 onClick={handleDecryptAll}
                 disabled={!isConnected || decrypting}
                 className="flex items-center justify-center gap-3 rounded-xl border border-white/20 bg-white/5 px-8 py-3 text-sm font-medium hover:bg-white/10 disabled:opacity-50 active:scale-[0.985] transition-all min-w-[240px]"
               >
                 <Eye className="h-4 w-4" />
-                {decrypting ? "OPENING THE VAULT..." : "DECRYPT MY POSITIONS"}
+                {decrypting || isRealDecryptFetching ? "OPENING THE VAULT..." : "DECRYPT MY POSITIONS"}
               </button>
+              {decryptionInputs.length > 0 && (
+                <div className="text-center text-[10px] text-emerald-400 mt-1">Real Zama KMS path available</div>
+              )}
 
               <button
                 onClick={handleGrantPermit}
