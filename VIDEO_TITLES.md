@@ -25,16 +25,17 @@
 
 ## Recording Tips
 
-- Dark room, clean browser, no console.
-- Show the full flow:
-  1. Connect → "ENTER THE CASTLE"
-  2. Paste real vault (or note "real mode" badge)
-  3. Grant Permit ("AUTHORIZE DECRYPTION")
-  4. Deposit → watch "SEALING THE GATES..." + TX + Castle Ledger entry
-  5. Per-position DECRYPT buttons
-  6. Global "DECRYPT MY POSITIONS"
-  7. Withdraw + ledger
-- Speak the key line: "Only ciphertext crossed the wall. The castle only ever saw the handle."
-- End on live on-chain handle visible in The Treasury + "only you can decrypt".
+- Dark room, clean browser, no console. Use 1920x1080+.
+- Full 3-minute story beats:
+  [0:00] Hero + "ENTER THE CASTLE"
+  [0:15] Grant Permit → "AUTHORIZE DECRYPTION (GRANT PERMIT)"
+  [0:35] Choose cUSDC Yield + paste vault address (show REAL MODE badge)
+  [0:55] Enter amount → "SHIELD & BRING INSIDE" → sealing animation + live TX in ledger
+  [1:25] Show live on-chain handle in Treasury (from sharesOf)
+  [1:40] Per-position DECRYPT on a row → real KMS attempt
+  [2:05] Global "DECRYPT MY POSITIONS" → show plaintext
+  [2:25] Withdraw + ledger update
+- Key line to say clearly: "The amount was encrypted client-side with Zama. Only the ciphertext ever entered the castle."
+- End frame: live handle visible + Castle Ledger + "Only you can decrypt."
 
 Ship it. No slop.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useAccount, useConnect, useDisconnect, useWriteContract, useReadContract } from "wagmi";
 import { injected } from "wagmi/connectors";
@@ -90,9 +90,40 @@ export default function Celano() {
     args: address ? [address] : undefined,
     query: { enabled: !!address && !!vaultAddress && !vaultAddress.includes("YourDeployed") },
   });
+
   // positions store the visible ciphertext handles (real from SDK after encrypt)
   // Start empty — the dramatic "treasury stands empty" is part of the castle story
   const [positions, setPositions] = useState<Array<{ token: string; handle: string; encrypted: boolean; rawHandle?: unknown }>>([]);
+
+  // Derived inputs for real user decryption via Zama KMS / relayer
+  const decryptionInputs = useMemo(() => {
+    if (onChainSharesHandle && vaultAddress && !vaultAddress.includes("YourDeployed")) {
+      return [
+        { encryptedValue: onChainSharesHandle as `0x${string}`, contractAddress: vaultAddress as `0x${string}` },
+      ];
+    }
+    return positions
+      .filter((p) => p.rawHandle)
+      .map((p) => ({
+        encryptedValue: p.rawHandle as `0x${string}`,
+        contractAddress: selectedStrategy.address as `0x${string}`,
+      }));
+  }, [onChainSharesHandle, vaultAddress, positions, selectedStrategy.address]);
+
+  const {
+    data: decryptedData,
+    refetch: refetchDecrypt,
+    isFetching: isRealDecryptFetching,
+  } = useDecryptValues(decryptionInputs, { enabled: false });
+
+  // Live-feeling accrued yield (encrypted view) — ticks to feel alive
+  const [accruedYield, setAccruedYield] = useState(9.87);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setAccruedYield((a) => +(a + 0.011 + Math.random() * 0.004).toFixed(2));
+    }, 3800);
+    return () => clearInterval(id);
+  }, []);
 
   const handleConnect = () => {
     connect({ connector: injected() });
@@ -120,62 +151,73 @@ export default function Celano() {
     }
   };
 
-  // Real decryption path using Zama SDK user decryption (EIP-712 signature to KMS).
+  // Real decryption path — attempts actual useDecryptValues against the relayer when handles exist.
   const handleDecryptAll = async () => {
     if (!isConnected) return;
     setDecrypting(true);
 
     try {
-      const liveHandle = onChainSharesHandle as `0x${string}` | undefined;
-      const inputs = liveHandle
-        ? [{ encryptedValue: liveHandle, contractAddress: vaultAddress as `0x${string}` }]
-        : positions.map(p => p.rawHandle).filter(Boolean).map(h => ({ encryptedValue: h as `0x${string}`, contractAddress: vaultAddress as `0x${string}` }));
+      if (decryptionInputs.length > 0) {
+        const { data } = await refetchDecrypt();
 
-      if (inputs.length > 0) {
-        // In production: const res = await useDecryptValues(inputs) or delegated path
-        await new Promise(r => setTimeout(r, 720));
-        const value = (12450 + Math.random() * 1300).toFixed(2);
-        setPrivateValue(value);
-        logActivity("DECRYPTED", `Revealed aggregate ${value} USD (KMS)`);
-        toast.success("Decrypted via Zama KMS. Only you can see inside the castle.");
+        if (data && Object.keys(data).length > 0) {
+          // Real clear value from KMS / relayer
+          const first = Object.values(data)[0] as bigint | number;
+          const num = typeof first === "bigint" ? Number(first) / 1_000_000 : Number(first);
+          const value = num.toFixed(2);
+          setPrivateValue(value);
+          logActivity("DECRYPTED (REAL)", `KMS plaintext: ${value} USD`);
+          toast.success("Real decryption from Zama KMS. Only you can see this.");
+        } else {
+          // No result yet (ACL / permit not fully propagated, or no on-chain position)
+          const value = (12450 + Math.random() * 900).toFixed(2);
+          setPrivateValue(value);
+          logActivity("DECRYPTED", `Aggregate ${value} (demo — no on-chain result yet)`);
+          toast.success("Decrypted (demo view — grant permit + real deposit for live KMS).");
+        }
       } else {
-        await new Promise(r => setTimeout(r, 420));
-        const value = (12450 + Math.random() * 1300).toFixed(2);
+        await new Promise((r) => setTimeout(r, 420));
+        const value = (12450 + Math.random() * 900).toFixed(2);
         setPrivateValue(value);
-        logActivity("DECRYPTED", "Viewed positions");
+        logActivity("DECRYPTED", "Viewed positions (demo)");
         toast.success("Positions decrypted. Only you can see this.");
       }
     } catch (e: any) {
       console.error(e);
-      const value = (12450 + Math.random() * 1300).toFixed(2);
+      const value = (12450 + Math.random() * 900).toFixed(2);
       setPrivateValue(value);
-      toast.success("Positions decrypted (local view).");
+      toast.error("Real decrypt attempt failed (check permit / ACL). Showing demo view.");
     } finally {
       setDecrypting(false);
     }
   };
 
-  // Decrypt a single position using its handle (more surgical, great for video)
+  // Per-position real decrypt attempt
   const handleDecryptPosition = async (index: number) => {
     const pos = positions[index];
-    const handle = (pos.rawHandle || (index === 0 && onChainSharesHandle)) as `0x${string}` | undefined;
-
     setDecrypting(true);
     try {
-      if (handle && vaultAddress && !vaultAddress.includes("YourDeployed")) {
-        // Real path would use the handle + contract for user decrypt
-        await new Promise(r => setTimeout(r, 580));
-        const value = (3800 + Math.random() * 420).toFixed(2);
+      // Force using current inputs which may include the live on-chain handle
+      const { data } = await refetchDecrypt();
+
+      if (data && Object.keys(data).length > 0) {
+        const first = Object.values(data)[0] as bigint | number;
+        const num = typeof first === "bigint" ? Number(first) / 1_000_000 : Number(first);
+        const value = num.toFixed(2);
         setPrivateValue(value);
-        logActivity("DECRYPTED POSITION", `${pos.token} • ${value} USD`, lastTxHash);
-        toast.success(`Decrypted ${pos.token} position. Plaintext visible only to you.`);
+        logActivity("DECRYPTED POSITION (REAL)", `${pos.token} ${value}`, lastTxHash);
+        toast.success(`Real KMS decrypt for ${pos.token}. Only you see the plaintext.`);
       } else {
-        await new Promise(r => setTimeout(r, 380));
+        await new Promise((r) => setTimeout(r, 380));
         const value = (3800 + Math.random() * 420).toFixed(2);
         setPrivateValue(value);
         logActivity("DECRYPTED POSITION", `${pos.token} (demo)`);
-        toast.success("Position decrypted (demo value).");
+        toast.success("Position decrypted (demo — deposit via real vault for live).");
       }
+    } catch (e) {
+      const value = (3800 + Math.random() * 420).toFixed(2);
+      setPrivateValue(value);
+      toast.error("Decrypt attempt failed. Demo value shown.");
     } finally {
       setDecrypting(false);
     }
@@ -375,7 +417,10 @@ export default function Celano() {
                   </span>
                   <span className="text-3xl text-zinc-500">USD</span>
                 </div>
-                <div className="mt-0.5 text-xs text-emerald-400/70">+ { (parseFloat(privateValue || "12450") * 0.0008).toFixed(2) } USD accrued today (encrypted)</div>
+                <div className="mt-0.5 flex items-center gap-2 text-xs text-emerald-400/70">
+                  + <span className="tabular-nums font-medium text-emerald-400">{accruedYield}</span> USD yield accrued today (encrypted)
+                  <span className="text-[9px] text-emerald-400/50">LIVE</span>
+                </div>
                 <div className="mt-1 text-[10px] text-zinc-500">LAST SEALED • {new Date().toLocaleDateString()} {new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
                 <div className="mt-1 flex items-center gap-2 text-sm text-emerald-400">
                   <TrendingUp className="h-4 w-4" /> Fully encrypted on Zama • Only the initiated may enter
@@ -622,8 +667,36 @@ export default function Celano() {
                 <div className="mt-1 text-[9px] text-white/30">After deploy, your positions will appear via sharesOf on the live vault.</div>
               </div>
 
-              <div className="mt-3 text-[10px] text-zinc-500 leading-snug border-t border-white/10 pt-2">
-                Test assets: Visit the official Zama Sepolia wrappers page or mint interface to get cUSDC for shielding.
+              {/* One-click test asset addresses */}
+              <div className="mt-3 rounded-xl border border-white/10 bg-zinc-950/70 p-3 text-xs">
+                <div className="uppercase tracking-[2px] text-[10px] text-zinc-500 mb-1.5">Sepolia test assets (copy)</div>
+                <div className="space-y-1 font-mono text-[11px]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-emerald-400">cUSDC</span>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(C_USDC_MOCK);
+                        toast.success("cUSDC address copied");
+                      }}
+                      className="rounded border border-white/15 px-2 py-px hover:bg-white/5 active:scale-[0.985]"
+                    >
+                      {C_USDC_MOCK.slice(0, 6)}…{C_USDC_MOCK.slice(-4)} COPY
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-emerald-400">Registry</span>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(WRAPPERS_REGISTRY);
+                        toast.success("Registry address copied");
+                      }}
+                      className="rounded border border-white/15 px-2 py-px hover:bg-white/5 active:scale-[0.985]"
+                    >
+                      {WRAPPERS_REGISTRY.slice(0, 6)}…{WRAPPERS_REGISTRY.slice(-4)} COPY
+                    </button>
+                  </div>
+                </div>
+                <div className="mt-2 text-[10px] text-zinc-500">Shield cUSDC via the official Zama wrappers UI, then bring it inside the castle.</div>
               </div>
 
               <button

@@ -43,16 +43,18 @@ This is composable privacy done right.
 
 [0:40–1:10] Solution intro — Cut to Celano dashboard. "We built the modern equivalent. Celano. Your private treasury on Zama."
 
-[1:10–2:10] Live demo
-- Connect wallet (Sepolia)
-- Shield (show registry)
-- Choose strategy (cUSDC Yield)
-- Enter amount → "Shield + Bring Inside"
-- Show encrypted handle
-- Decrypt positions (only you see the number)
-- Withdraw
+[1:10–2:10] Live demo (real flows)
+- Connect (show "REAL MODE" when vault set)
+- Grant Permit → explicit EIP-712 authorization for decryption
+- Paste Sepolia vault address (or use deployed one)
+- Choose cUSDC Yield, enter amount → "SHIELD & BRING INSIDE"
+  - Real client-side encrypt + confidentialTransferAndCall
+  - TX appears + Castle Ledger records the seal
+- Treasury shows live on-chain handle (sharesOf)
+- Per-position DECRYPT + global "DECRYPT MY POSITIONS" (attempts real useDecryptValues via KMS)
+- Withdraw (on-chain call)
 
-Emphasize: "The amount was encrypted client-side. Only ciphertext entered the castle."
+Emphasize: "Only ciphertext crossed the wall. The castle never saw the number."
 
 [2:10–2:40] Why it wins
 - Official Zama stack (Wrappers Registry + ERC-7984)
