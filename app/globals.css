@@ -1,26 +1,149 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  font-family: var(--font-geist-sans);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Historic premium typography system */
+h1, h2, .brand-heading {
+  font-family: var(--font-cinzel);
+  font-feature-settings: "tnum", "lnum";
+}
+
+.whitepaper-body,
+.docs-body {
+  font-family: var(--font-eb-garamond);
+  font-size: 17px;
+  line-height: 1.75;
+}
+
+.whitepaper-body h1,
+.whitepaper-body h2 {
+  font-family: var(--font-cinzel);
+}
+
+/* Premium dark baseline */
+.dark {
+  color-scheme: dark;
+}
+
+/* Historic dotted patterns — subtle security paper / constellation feel */
+.dot-grid {
+  background-image: 
+    radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 3px 3px;
+}
+
+.dot-grid-fine {
+  background-image: 
+    radial-gradient(circle, rgba(255,255,255,0.025) 0.8px, transparent 0.8px);
+  background-size: 5px 5px;
+}
+
+/* Elegant dotted divider */
+.dotted-divider {
+  border-image: repeating-linear-gradient(
+    to right,
+    rgba(255,255,255,0.15) 0,
+    rgba(255,255,255,0.15) 2px,
+    transparent 2px,
+    transparent 6px
+  ) 1;
+}
+
+/* Subtle dotted frame for premium cards */
+.dotted-frame {
+  position: relative;
+}
+.dotted-frame::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background-image: 
+    linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 6px 6px;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 0;
+}
+.dotted-frame > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ASCII dotted constellation style element */
+.ascii-dots {
+  font-family: var(--font-geist-mono);
+  font-size: 10px;
+  line-height: 8px;
+  letter-spacing: 3px;
+  color: rgba(255,255,255,0.12);
+  user-select: none;
+}
+
+/* Castle / Fortress patterns — industry premium */
+.castle-battlements {
+  height: 4px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255,255,255,0.09) 0 5px,
+    transparent 5px 11px
+  );
+  background-size: 16px 100%;
+}
+
+.castle-stone {
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.035) 1px, transparent 0),
+    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px);
+  background-size: 4px 4px, 3px 3px;
+}
+
+.castle-vault {
+  position: relative;
+}
+.castle-vault::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(135deg, rgba(255,255,255,0.015) 25%, transparent 25%) -1px -1px,
+    linear-gradient(225deg, rgba(255,255,255,0.015) 25%, transparent 25%) -1px -1px;
+  background-size: 6px 6px;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Institutional finance polish */
+.institutional-card {
+  background: #111113;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: border-color 0.1s ease, transform 0.1s ease;
+}
+.institutional-card:hover {
+  border-color: rgba(255,255,255,0.15);
+}
+
+.status-secure {
+  color: #22c55e;
+  font-feature-settings: "tnum";
+}
+
+.data-dense {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Extra fortress density */
+.blotter {
+  font-feature-settings: "tnum";
+}
+.blotter th {
+  font-weight: 400;
+  letter-spacing: 1.5px;
 }

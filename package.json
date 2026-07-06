@@ -1,22 +1,44 @@
 {
-  "name": "zama",
+  "name": "celano",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "pre-flight": "pnpm typecheck && echo '✅ Pre-flight passed (typecheck clean)'",
+    "deploy:sepolia": "hardhat run scripts/deploy.ts --network sepolia"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5",
+    "@tokenops/sdk": "^1",
+    "@zama-fhe/react-sdk": "^3",
+    "@zama-fhe/sdk": "^3",
+    "framer-motion": "^12.42.2",
+    "lucide-react": "^0.525.0",
     "next": "16.2.10",
+    "papaparse": "^5.5.2",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "react-hot-toast": "^2.5.2",
+    "sonner": "^2.0.7",
+    "viem": "^2",
+    "wagmi": "^2",
+    "zod": "^3.25.67"
   },
   "devDependencies": {
+    "@fhevm/hardhat-plugin": "^0.4.2",
+    "@fhevm/solidity": "^0.11.1",
+    "@nomicfoundation/hardhat-toolbox": "^7.0.0",
+    "@openzeppelin/confidential-contracts": "^0.5.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/papaparse": "^5.3.16",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "hardhat": "^3.9.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
