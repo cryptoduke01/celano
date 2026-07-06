@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAccount, useConnect, useDisconnect, useWriteContract, useReadContract } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { encodeAbiParameters } from "viem";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Shield, 
   Eye, 
@@ -414,7 +414,7 @@ export default function Celano() {
 
           <motion.div
             whileHover={{ scale: 1.001 }}
-            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
             className="premium-card gold-accent p-8"
           >
             <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-y-6">
@@ -446,9 +446,17 @@ export default function Celano() {
                     )}
                   </div>
                 )}
-                <div className="mt-0.5 flex items-center gap-2 text-xs text-emerald-400/70">
-                  + <span className="tabular-nums font-medium text-emerald-400">{accruedYield}</span> USD yield accrued today (encrypted)
-                  <span className="text-[9px] text-emerald-400/50">LIVE</span>
+                <div className="mt-0.5 flex items-center gap-2 text-xs text-[#c5a26f]/70">
+                  + <motion.span 
+                      key={accruedYield} 
+                      initial={{ opacity: 0.6, y: 1 }} 
+                      animate={{ opacity: 1, y: 0 }} 
+                      transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+                      className="tabular-nums font-medium text-[#c5a26f]"
+                    >
+                      {accruedYield}
+                    </motion.span> USD yield accrued (encrypted)
+                  <span className="text-[9px] text-[#c5a26f]/50">LIVE</span>
                 </div>
                 <div className="mt-1 text-[10px] text-[#a1a1aa]">LAST SEALED • {new Date().toLocaleDateString()} {new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
                 <div className="mt-1 flex items-center gap-2 text-sm text-emerald-400">
@@ -565,11 +573,19 @@ export default function Celano() {
                 </div>
               )}
 
+              <AnimatePresence>
               {positions.map((pos, i) => (
                 <motion.div
                   key={i}
+                  initial={{ opacity: 0, y: 8, scale: 0.985 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                  transition={{ 
+                    duration: 0.22, 
+                    ease: [0.23, 1, 0.32, 1],
+                    delay: i * 0.03 
+                  }}
                   whileHover={{ scale: 1.002 }}
-                  transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                   className="premium-card flex items-center justify-between px-6 py-5"
                 >
                   <div className="flex items-center gap-4">
@@ -600,6 +616,7 @@ export default function Celano() {
                   </div>
                 </motion.div>
               ))}
+              </AnimatePresence>
 
               {/* Dense blotter table for pros */}
               {positions.length > 0 && (
@@ -635,7 +652,7 @@ export default function Celano() {
 
             <motion.div
               whileHover={{ scale: 1.001 }}
-              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
               className="premium-card p-6"
             >
               <div className="text-xs text-[#a1a1aa] mb-2 tracking-widest">STRATEGY</div>

@@ -14,7 +14,7 @@ export function VaultDoor({ state = "closed" }: { state?: "closed" | "sealing" |
         {label}
       </div>
       {isSealing && (
-        <div className="h-px w-6 bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
+        <div className="h-px w-6 bg-[#c5a26f]/40" />
       )}
     </div>
   );

@@ -141,7 +141,9 @@ h1, h2, .section-title {
 .btn-primary:hover:not(:disabled) {
   background: var(--gold-bright);
   border-color: var(--gold-bright);
-  transform: translateY(-1px);
+}
+.btn-primary:active:not(:disabled) {
+  transform: scale(0.985);
 }
 
 .btn-secondary {
@@ -152,6 +154,9 @@ h1, h2, .section-title {
 .btn-secondary:hover:not(:disabled) {
   border-color: var(--gold);
   color: var(--gold);
+}
+.btn-secondary:active:not(:disabled) {
+  transform: scale(0.985);
 }
 
 .btn-ghost {
