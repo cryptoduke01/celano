@@ -436,6 +436,9 @@ export default function Celano() {
                     {privateValue ? privateValue : "••••••"}
                   </span>
                   <span className="text-3xl text-zinc-500">USD</span>
+                  {lastDecryptedHandle && (
+                    <span className="ml-1 rounded bg-emerald-500/15 px-2 py-0.5 text-[10px] text-emerald-400">KMS</span>
+                  )}
                 </div>
 
                 {lastDecryptedHandle && (
