@@ -3,15 +3,15 @@ import { CastleLogo } from "@/app/components/CastleMark";
 
 export default function Docs() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-200">
+    <div className="min-h-screen bg-[#0b0b0c] text-[#f4f4f5]">
       <div className="mx-auto max-w-4xl px-8 py-12">
-        <Link href="/" className="text-sm text-zinc-400 hover:text-white">← Back to the Castle</Link>
+        <Link href="/" className="text-sm text-[#a1a1aa] hover:text-[#f4f4f5]">← Back</Link>
 
         <div className="mt-6">
           <CastleLogo />
         </div>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight brand-heading">Documentation</h1>
-        <p className="mt-2 text-zinc-400">How to enter the castle and guard your yield.</p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight">Documentation</h1>
+        <p className="mt-2 text-[#a1a1aa]">How Celano works.</p>
 
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="border border-white/10 rounded-2xl p-6">

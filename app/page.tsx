@@ -16,8 +16,6 @@ import {
   ExternalLink 
 } from "lucide-react";
 import { toast } from "sonner";
-import { DottedConstellation } from "./components/DottedConstellation";
-import { Battlements, StoneWall, ASCIICastle, CastleMapDots } from "./components/CastlePatterns";
 import { CastleMap } from "./components/CastleMap";
 import { VaultDoor } from "./components/VaultDoor";
 import { LiveTx } from "./components/LiveTx";
@@ -339,103 +337,94 @@ export default function Celano() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-200">
-      {/* Top nav - clean and premium */}
-      <nav className="border-b border-white/10 bg-zinc-950/95 backdrop-blur-xl sticky top-0 z-50">
-        <div className="mx-auto max-w-7xl px-8 flex h-16 items-center justify-between">
+    <div className="min-h-screen bg-[#0b0b0c] text-[#f4f4f5]">
+      {/* Top bar — premium finance style (inspired by reference dashboards) */}
+      <nav className="border-b border-[#252528] bg-[#0b0b0c]/95 backdrop-blur-xl sticky top-0 z-50">
+        <div className="mx-auto max-w-7xl px-6 md:px-8 flex h-16 items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <CastleMark size={36} />
-              <div>
-                <div className="font-semibold tracking-tight text-2xl brand-heading">Celano</div>
-                <div className="text-[9px] text-zinc-500 -mt-1.5 tracking-[2px]">THE CASTLE</div>
-              </div>
+            <CastleMark size={34} gold />
+            <div>
+              <div className="logotype text-2xl leading-none tracking-[-0.015em]">Celano</div>
+              <div className="text-[9px] tracking-[2px] text-[#a1a1aa] -mt-px">PRIVATE YIELD • ZAMA</div>
             </div>
-            <div className="hidden md:block h-5 w-px bg-white/10" />
-            <div className="hidden md:flex items-center text-xs text-zinc-500 tracking-[2px]">ABRUZZO • CASTLE • FHEVM</div>
             {vaultAddress && !vaultAddress.includes("YourDeployed") && (
-              <div className="hidden md:block text-[10px] px-2 py-0.5 rounded border border-emerald-500/40 text-emerald-400 tracking-[1px]">REAL MODE</div>
+              <div className="ml-2 hidden md:block text-[10px] px-2 py-px rounded border border-[#c5a26f]/40 text-[#c5a26f] tracking-[1px]">LIVE</div>
             )}
           </div>
 
           <div className="flex items-center gap-3 text-sm">
-            <div className="hidden lg:flex items-center gap-2 rounded border border-white/10 px-3 py-1 text-xs text-zinc-400">
-              <Lock className="h-3 w-3" /> CASTLE SECURED
+            {accruedYield !== null && isConnected && (
+              <div className="hidden md:flex items-center gap-2 rounded-full border border-[#252528] bg-[#131315] px-3 py-1 text-xs">
+                <span className="text-[#a1a1aa]">ACCRUED</span>
+                <span className="font-medium text-[#c5a26f] tabular-nums">+${accruedYield.toFixed(2)}</span>
+              </div>
+            )}
+
+            <div className="hidden sm:flex items-center gap-1.5 rounded-full border border-[#252528] px-3 py-1 text-xs text-[#a1a1aa]">
+              SECURED
             </div>
 
             {isConnected ? (
               <button
                 onClick={handleDisconnect}
-                className="flex items-center gap-2 rounded border border-white/20 px-4 py-1.5 text-sm hover:bg-white/5 transition-colors font-mono"
+                className="btn btn-secondary text-xs font-mono px-4 py-1.5"
               >
-                <Wallet className="h-4 w-4" />
                 {address?.slice(0, 6)}…{address?.slice(-4)}
               </button>
             ) : (
-              <button
-                onClick={handleConnect}
-                className="flex items-center gap-2 rounded bg-white px-6 py-1.5 text-sm font-medium text-zinc-950 hover:bg-zinc-100 active:scale-[0.985] transition-all"
-              >
-                <Wallet className="h-4 w-4" />
-                ENTER THE CASTLE
+              <button onClick={handleConnect} className="btn btn-primary">
+                <Wallet className="h-4 w-4" /> CONNECT
               </button>
             )}
           </div>
         </div>
-        <Battlements className="opacity-50" />
       </nav>
 
-      <div className="mx-auto max-w-7xl px-8 pt-8 pb-20 castle-stone">
-        {/* Castle Overview */}
-        <div className="mb-12 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1 text-xs tracking-[3px] text-emerald-400 mb-4">
-            COMPOSABLE PRIVATE YIELD
+      <div className="mx-auto max-w-7xl px-6 md:px-8 pt-8 pb-20">
+        {/* Hero — clean premium dashboard feel */}
+        <div className="mb-10 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#252528] bg-[#131315] px-4 py-1 text-[10px] tracking-[2px] text-[#c5a26f] mb-4">
+            PRIVATE YIELD ON ZAMA
           </div>
 
-          <h1 className="text-7xl font-semibold tracking-[-3.5px] brand-heading leading-none">
-            Celano.<br />The castle that guards your yield.
+          <h1 className="text-6xl md:text-7xl font-semibold tracking-[-3.2px] leading-[0.92]">
+            Celano.<br />Sealed yield. Yours alone.
           </h1>
 
-          <p className="mx-auto mt-4 max-w-lg text-xl text-zinc-400">
-            In the hills of Abruzzo the castle of Celano has guarded what matters for centuries.<br />
-            Shield. Encrypt. Enter the keep. Only you can see inside.
+          <p className="mx-auto mt-3 max-w-md text-lg text-[#a1a1aa]">
+            Encrypted on-chain positions. Decrypt only when you choose.
           </p>
 
-          <div className="mt-5 flex justify-center gap-5 text-xs">
-            <Link href="/whitepaper" className="underline decoration-white/30 hover:decoration-white">The Charter</Link>
-            <Link href="/docs" className="underline decoration-white/30 hover:decoration-white">The Gates</Link>
+          <div className="mt-4 flex justify-center gap-4 text-xs">
+            <Link href="/whitepaper" className="text-[#a1a1aa] hover:text-[#f4f4f5] underline decoration-[#252528] hover:decoration-[#c5a26f]">Whitepaper</Link>
+            <Link href="/docs" className="text-[#a1a1aa] hover:text-[#f4f4f5] underline decoration-[#252528] hover:decoration-[#c5a26f]">Docs</Link>
           </div>
 
-          <div className="mt-7 flex flex-col items-center">
-            <CastleMark size={72} />
-            <div className="mt-3">
-              <ASCIICastle size="lg" />
-            </div>
-            <CastleMapDots className="mt-1" />
+          <div className="mt-6">
+            <CastleMark size={58} gold />
           </div>
-
-          <div className="mt-4 text-[10px] text-zinc-500 tracking-[2px]">THE CASTLE OF CELANO — ABRUZZO, ITALY</div>
         </div>
 
-        {/* The Keep — Main Treasury View */}
+        {/* The Keep — encrypted value + decrypt controls */}
         <div className="mb-8">
           <div className="flex items-baseline justify-between px-1 mb-3">
-            <div className="text-xs tracking-[2px] text-zinc-500">THE KEEP</div>
-            <div className="text-[10px] text-zinc-500">Private holdings behind the walls</div>
+            <div className="text-xs tracking-[1.5px] text-[#a1a1aa]">THE KEEP</div>
+            <div className="text-[10px] text-[#a1a1aa]">Encrypted value • decrypt on demand</div>
           </div>
 
           <motion.div
-            whileHover={{ scale: 1.002 }}
-            className="castle-vault institutional-card rounded-2xl p-8"
+            whileHover={{ scale: 1.001 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="premium-card gold-accent p-8"
           >
             <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-y-6">
               <div>
-                <div className="text-sm text-zinc-400">TOTAL ENCRYPTED VALUE</div>
+                <div className="text-sm text-[#a1a1aa]">ENCRYPTED VALUE</div>
                 <div className="mt-1 flex items-baseline gap-3">
-                  <span className="text-7xl font-semibold tabular-nums tracking-[-2.5px] data-dense">
+                  <span className="text-7xl font-semibold tabular-nums tracking-[-2.5px] data-dense text-[#f4f4f5]">
                     {privateValue ? privateValue : "••••••"}
                   </span>
-                  <span className="text-3xl text-zinc-500">USD</span>
+                  <span className="text-3xl text-[#a1a1aa]">USD</span>
                   {lastDecryptedHandle && (
                     <span className="ml-1 rounded bg-emerald-500/15 px-2 py-0.5 text-[10px] text-emerald-400">KMS</span>
                   )}
@@ -461,7 +450,7 @@ export default function Celano() {
                   + <span className="tabular-nums font-medium text-emerald-400">{accruedYield}</span> USD yield accrued today (encrypted)
                   <span className="text-[9px] text-emerald-400/50">LIVE</span>
                 </div>
-                <div className="mt-1 text-[10px] text-zinc-500">LAST SEALED • {new Date().toLocaleDateString()} {new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+                <div className="mt-1 text-[10px] text-[#a1a1aa]">LAST SEALED • {new Date().toLocaleDateString()} {new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
                 <div className="mt-1 flex items-center gap-2 text-sm text-emerald-400">
                   <TrendingUp className="h-4 w-4" /> Fully encrypted on Zama • Only the initiated may enter
                 </div>
@@ -484,7 +473,6 @@ export default function Celano() {
                   <VaultDoor state={isDepositing || isWritePending ? "sealing" : privateValue ? "open" : "closed"} />
                 </div>
 
-                {/* Real on-chain activity indicator */}
                 {lastTxHash && (
                   <div className="mt-3">
                     <LiveTx hash={lastTxHash} />
@@ -492,130 +480,120 @@ export default function Celano() {
                 )}
               </div>
 
+              <div className="flex flex-col items-end gap-2 min-w-[260px]">
                 <button
-                onClick={handleDecryptAll}
-                disabled={!isConnected || decrypting}
-                className="flex items-center justify-center gap-3 rounded-xl border border-white/20 bg-white/5 px-8 py-3 text-sm font-medium hover:bg-white/10 disabled:opacity-50 active:scale-[0.985] transition-all min-w-[240px]"
-              >
-                <Eye className="h-4 w-4" />
-                {decrypting || isRealDecryptFetching ? "OPENING THE VAULT..." : "DECRYPT MY POSITIONS"}
-              </button>
-              {decryptionInputs.length > 0 && (
-                <div className="text-center text-[10px] text-emerald-400 mt-1">Real Zama KMS path available</div>
-              )}
+                  onClick={handleDecryptAll}
+                  disabled={!isConnected || decrypting}
+                  className="btn btn-primary w-full justify-center"
+                >
+                  <Eye className="h-4 w-4" />
+                  {decrypting || isRealDecryptFetching ? "DECRYPTING..." : "DECRYPT POSITIONS"}
+                </button>
 
-              <button
-                onClick={handleGrantPermit}
-                disabled={!isConnected || grantPermit.isPending || !vaultAddress || vaultAddress.includes("YourDeployed")}
-                className="mt-2 flex items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-5 py-2 text-xs tracking-[1px] text-emerald-400 hover:bg-emerald-500/10 disabled:opacity-50 active:scale-[0.985] transition-all"
-              >
-                {grantPermit.isPending ? "AUTHORIZING..." : "AUTHORIZE DECRYPTION (GRANT PERMIT)"}
-              </button>
+                {decryptionInputs.length > 0 && (
+                  <div className="text-[10px] text-[#c5a26f]">KMS path ready</div>
+                )}
+
+                <button
+                  onClick={handleGrantPermit}
+                  disabled={!isConnected || grantPermit.isPending || !vaultAddress || vaultAddress.includes("YourDeployed")}
+                  className="btn btn-secondary w-full justify-center text-xs tracking-[0.5px]"
+                >
+                  {grantPermit.isPending ? "AUTHORIZING..." : "GRANT DECRYPT PERMIT"}
+                </button>
+              </div>
             </div>
 
-            <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm border-t border-white/10 pt-6">
+            <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm border-t border-[#252528] pt-6">
               <div>
-                <div className="text-zinc-400 text-xs tracking-widest">STRATEGIES HELD</div>
-                <div className="mt-1 text-3xl font-medium">{STRATEGIES.length}</div>
+                <div className="text-[#a1a1aa] text-xs tracking-widest">STRATEGIES</div>
+                <div className="mt-1 text-3xl font-medium tabular-nums">{STRATEGIES.length}</div>
               </div>
               <div>
-                <div className="text-zinc-400 text-xs tracking-widest">POSITIONS INSIDE</div>
-                <div className="mt-1 text-3xl font-medium">{positions.length}</div>
+                <div className="text-[#a1a1aa] text-xs tracking-widest">POSITIONS</div>
+                <div className="mt-1 text-3xl font-medium tabular-nums">{positions.length}</div>
               </div>
               <div>
-                <div className="text-zinc-400 text-xs tracking-widest">SECURITY LEVEL</div>
-                <div className="mt-1 flex items-center gap-2 text-emerald-400 font-medium">
-                  <Lock className="h-4 w-4" /> FHE • CASTLE SECURED
-                </div>
+                <div className="text-[#a1a1aa] text-xs tracking-widest">SECURITY</div>
+                <div className="mt-1 text-[#c5a26f] font-medium">FHE ENCRYPTED</div>
               </div>
               <div>
-                <div className="text-zinc-400 text-xs tracking-widest">CASTLE HEALTH</div>
-                <div className="mt-1 text-emerald-400 font-medium">100% • STONE</div>
+                <div className="text-[#a1a1aa] text-xs tracking-widest">STATUS</div>
+                <div className="mt-1 text-[#c5a26f] font-medium">OPERATIONAL</div>
               </div>
             </div>
           </motion.div>
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-          {/* The Treasury — Positions */}
+          {/* Positions / Treasury */}
           <div className="xl:col-span-7">
             <div className="flex items-center justify-between px-1 mb-3">
-              <div className="text-xs tracking-[2px] text-zinc-500">THE TREASURY</div>
-              <div className="text-[10px] text-zinc-500">Encrypted holdings inside the keep</div>
+              <div className="text-xs tracking-[1.5px] text-[#a1a1aa]">POSITIONS</div>
+              <div className="text-[10px] text-[#a1a1aa]">Encrypted • on-chain</div>
             </div>
-            <StoneWall className="mb-2 h-px" />
 
             <div className="space-y-3">
               {positions.length === 0 && (
-                <div className="institutional-card rounded-2xl p-8 text-center">
-                  <div className="flex justify-center mb-2 opacity-70">
-                    <ASCIICastle size="sm" />
-                  </div>
-                  <div className="text-sm text-zinc-400">The treasury stands empty.<br />Shield capital and bring it inside the walls.</div>
+                <div className="premium-card p-8 text-center text-sm text-[#a1a1aa]">
+                  No positions yet.<br />Deposit to create your first encrypted holding.
                 </div>
               )}
 
-              {/* Castle schematic view of holdings */}
               {positions.length > 0 && <CastleMap positions={positions} />}
 
-              {/* Live on-chain position from the vault (if sharesOf returned a handle) */}
               {onChainSharesHandle && (
-                <div className="institutional-card border border-emerald-500/30 bg-emerald-500/5 rounded-2xl px-6 py-4 flex items-center justify-between">
+                <div className="premium-card flex items-center justify-between border border-[#c5a26f]/20 bg-[#131315] px-6 py-4">
                   <div className="flex items-center gap-4">
-                    <div className="flex h-11 w-11 items-center justify-center rounded bg-emerald-500/10 font-mono text-sm tracking-tighter border border-emerald-500/20 text-emerald-400">
+                    <div className="flex h-11 w-11 items-center justify-center rounded bg-[#c5a26f]/10 font-mono text-sm tracking-tighter border border-[#c5a26f]/20 text-[#c5a26f]">
                       ON
                     </div>
                     <div>
-                      <div className="font-medium">On-chain position (vault)</div>
-                      <div className="text-xs text-emerald-400 font-mono mt-0.5">
+                      <div className="font-medium">On-chain position</div>
+                      <div className="text-xs text-[#a1a1aa] font-mono mt-0.5">
                         {String(onChainSharesHandle).slice(0, 12)}…{String(onChainSharesHandle).slice(-8)}
                       </div>
                     </div>
-                    <div className="rounded bg-emerald-500/20 px-2 py-px text-[10px] text-emerald-400 tracking-widest">LIVE • euint64</div>
+                    <div className="pill pill-gold">LIVE</div>
                   </div>
-                  <div className="flex items-center gap-2 text-[10px] text-emerald-400">
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(String(onChainSharesHandle));
-                        toast.success("On-chain handle copied");
-                      }}
-                      className="rounded border border-emerald-500/30 px-2 py-px hover:bg-emerald-500/10"
-                    >
-                      COPY
-                    </button>
-                    <span>DECRYPT TO VIEW</span>
-                  </div>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(String(onChainSharesHandle)); toast.success("Handle copied"); }}
+                    className="btn btn-secondary text-xs"
+                  >
+                    COPY
+                  </button>
                 </div>
               )}
 
               {positions.map((pos, i) => (
                 <motion.div
                   key={i}
-                  whileHover={{ scale: 1.005 }}
-                  className="group institutional-card dotted-frame flex items-center justify-between rounded-2xl px-6 py-5 hover:border-white/15 transition-colors"
+                  whileHover={{ scale: 1.002 }}
+                  transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                  className="premium-card flex items-center justify-between px-6 py-5"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="flex h-11 w-11 items-center justify-center rounded bg-white/5 font-mono text-sm tracking-tighter border border-white/10">
+                    <div className="flex h-11 w-11 items-center justify-center rounded bg-[#1f1f22] font-mono text-sm tracking-tighter border border-[#252528]">
                       {pos.token}
                     </div>
                     <div>
                       <div className="font-medium">{pos.token} Position</div>
-                      <div className="text-xs text-zinc-500 font-mono mt-0.5">{pos.handle}</div>
+                      <div className="text-xs text-[#a1a1aa] font-mono mt-0.5">{pos.handle}</div>
                     </div>
-                    <div className="rounded bg-emerald-500/10 px-2 py-px text-[10px] text-emerald-400 tracking-widest">ENCRYPTED</div>
+                    <div className="pill pill-gold">ENCRYPTED</div>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleDecryptPosition(i)}
                       disabled={decrypting}
-                      className="flex items-center gap-1.5 rounded-xl border border-emerald-500/30 px-4 py-2 text-xs text-emerald-400 hover:bg-emerald-500/5 active:scale-[0.985] transition-all"
+                      className="btn btn-secondary text-xs"
                     >
                       <Eye className="h-3.5 w-3.5" /> DECRYPT
                     </button>
                     <button
                       onClick={() => handleWithdraw(i)}
-                      className="flex items-center gap-2 rounded-xl border border-white/15 px-5 py-2 text-sm opacity-80 hover:opacity-100 hover:border-red-500/40 hover:text-red-400 active:scale-[0.985] transition-all"
+                      className="btn btn-secondary text-xs hover:border-red-500/40 hover:text-red-400"
                     >
                       <ArrowDownToLine className="h-4 w-4" /> WITHDRAW
                     </button>
@@ -625,9 +603,9 @@ export default function Celano() {
 
               {/* Dense blotter table for pros */}
               {positions.length > 0 && (
-                <div className="mt-4 overflow-x-auto text-xs font-mono border border-white/10 rounded-xl blotter">
+                <div className="mt-4 overflow-x-auto text-xs font-mono border border-[#252528] rounded-xl blotter">
                   <table className="w-full">
-                    <thead className="text-white/40">
+                    <thead className="text-[#a1a1aa]">
                       <tr>
                         <th className="text-left p-3">ASSET</th>
                         <th className="text-right p-3">HANDLE</th>
@@ -636,10 +614,10 @@ export default function Celano() {
                     </thead>
                     <tbody>
                       {positions.map((pos, i) => (
-                        <tr key={i} className="border-t border-white/10">
+                        <tr key={i} className="border-t border-[#252528]">
                           <td className="p-3">{pos.token}</td>
                           <td className="p-3 text-right text-white/60">{pos.handle}</td>
-                          <td className="p-3 text-right text-emerald-400">ENCRYPTED</td>
+                          <td className="p-3 text-right text-[#c5a26f]">ENCRYPTED</td>
                         </tr>
                       ))}
                     </tbody>
@@ -649,52 +627,52 @@ export default function Celano() {
             </div>
           </div>
 
-          {/* The Armory — Shield & Deposit */}
+          {/* Deposit / Armory */}
           <div className="xl:col-span-5">
             <div className="px-1 mb-3">
-              <div className="text-xs tracking-[2px] text-zinc-500">THE ARMORY</div>
+              <div className="text-xs tracking-[1.5px] text-[#a1a1aa]">DEPOSIT</div>
             </div>
 
             <motion.div
-              whileHover={{ scale: 1.003 }}
-              className="institutional-card castle-vault rounded-2xl p-6"
+              whileHover={{ scale: 1.001 }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className="premium-card p-6"
             >
-              <div className="text-xs text-zinc-400 mb-2 tracking-widest">CHOOSE STRATEGY</div>
+              <div className="text-xs text-[#a1a1aa] mb-2 tracking-widest">STRATEGY</div>
 
               {STRATEGIES.map((s) => (
                 <button
                   key={s.id}
                   onClick={() => setSelectedStrategy(s)}
-                  className={`w-full text-left mb-2 rounded-xl border p-4 transition-all ${selectedStrategy.id === s.id ? "border-white/40 bg-white/5" : "border-white/10 hover:border-white/20"}`}
+                  className={`w-full text-left mb-2 rounded-xl border p-4 transition-all ${selectedStrategy.id === s.id ? "border-[#c5a26f]/40 bg-[#1a1814]" : "border-[#252528] hover:border-[#333]"}`}
                 >
                   <div className="flex justify-between font-medium">
                     <span>{s.name}</span>
-                    <span className="text-emerald-400 text-sm tabular-nums">{s.apy}</span>
+                    <span className="text-[#c5a26f] text-sm tabular-nums">{s.apy}</span>
                   </div>
-                  <div className="text-sm text-zinc-400 mt-1 leading-snug">{s.description}</div>
+                  <div className="text-sm text-[#a1a1aa] mt-1 leading-snug">{s.description}</div>
                 </button>
               ))}
 
               <div className="mt-5">
-                <div className="text-xs text-zinc-400 mb-1.5 tracking-widest">DEPOSIT AMOUNT</div>
-                <div className="flex items-center rounded-xl border border-white/10 bg-black/40 px-4 py-3">
+                <div className="text-xs text-[#a1a1aa] mb-1.5 tracking-widest">AMOUNT</div>
+                <div className="flex items-center rounded-xl border border-[#252528] bg-[#0f0f11] px-4 py-3">
                   <input
                     type="number"
                     value={depositAmount}
                     onChange={(e) => setDepositAmount(e.target.value)}
                     placeholder="0.00"
-                    className="flex-1 bg-transparent text-3xl font-medium placeholder:text-zinc-700 focus:outline-none data-dense tabular-nums"
+                    className="flex-1 bg-transparent text-3xl font-medium placeholder:text-[#555] focus:outline-none tabular-nums"
                   />
-                  <div className="pl-3 text-sm text-zinc-400">{selectedStrategy.token}</div>
+                  <div className="pl-3 text-sm text-[#a1a1aa]">{selectedStrategy.token}</div>
                 </div>
               </div>
 
-              {/* Real vault target — change after you deploy the contract */}
               <div className="mt-4">
-                <div className="flex items-center justify-between text-xs text-zinc-400 mb-1.5 tracking-widest">
-                  <span>TARGET CASTLE VAULT (Sepolia)</span>
+                <div className="flex items-center justify-between text-xs text-[#a1a1aa] mb-1.5 tracking-widest">
+                  <span>VAULT ADDRESS (Sepolia)</span>
                   {!vaultAddress.includes("YourDeployed") ? (
-                    <span className="text-emerald-400">LIVE</span>
+                    <span className="text-[#c5a26f]">LIVE</span>
                   ) : (
                     <span className="text-amber-400">DEMO</span>
                   )}
@@ -702,60 +680,44 @@ export default function Celano() {
                 <input
                   value={vaultAddress}
                   onChange={(e) => setVaultAddress(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-black/60 px-3 py-2 font-mono text-xs placeholder:text-zinc-600 focus:outline-none"
-                  placeholder="0x..."
+                  className="input w-full font-mono text-xs"
+                  placeholder="0xYourVault..."
                 />
-                <div className="mt-1 text-[10px] text-zinc-500">Deploy: pnpm deploy:sepolia  •  Then paste address here</div>
-                <div className="mt-0.5 text-[10px] text-amber-400/70">Need cUSDC? Use the public Zama faucet / wrapper UI on Sepolia.</div>
-                <div className="mt-1 text-[9px] text-white/30">After deploy, your positions will appear via sharesOf on the live vault.</div>
+                <div className="mt-1 text-[10px] text-[#a1a1aa]">Deploy with pnpm deploy:sepolia then paste the address.</div>
               </div>
 
-              {/* One-click test asset addresses */}
-              <div className="mt-3 rounded-xl border border-white/10 bg-zinc-950/70 p-3 text-xs">
-                <div className="uppercase tracking-[2px] text-[10px] text-zinc-500 mb-1.5">Sepolia test assets (copy)</div>
+              {/* Test assets */}
+              <div className="mt-3 rounded-xl border border-[#252528] bg-[#0f0f11] p-3 text-xs">
+                <div className="uppercase tracking-[1.5px] text-[10px] text-[#a1a1aa] mb-1.5">TEST ASSETS</div>
                 <div className="space-y-1 font-mono text-[11px]">
                   <div className="flex items-center justify-between">
-                    <span className="text-emerald-400">cUSDC</span>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(C_USDC_MOCK);
-                        toast.success("cUSDC address copied");
-                      }}
-                      className="rounded border border-white/15 px-2 py-px hover:bg-white/5 active:scale-[0.985]"
-                    >
-                      {C_USDC_MOCK.slice(0, 6)}…{C_USDC_MOCK.slice(-4)} COPY
+                    <span className="text-[#c5a26f]">cUSDC</span>
+                    <button onClick={() => { navigator.clipboard.writeText(C_USDC_MOCK); toast.success("Copied"); }} className="btn btn-secondary text-[10px] px-2 py-px">
+                      {C_USDC_MOCK.slice(0,6)}… COPY
                     </button>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-emerald-400">Registry</span>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(WRAPPERS_REGISTRY);
-                        toast.success("Registry address copied");
-                      }}
-                      className="rounded border border-white/15 px-2 py-px hover:bg-white/5 active:scale-[0.985]"
-                    >
-                      {WRAPPERS_REGISTRY.slice(0, 6)}…{WRAPPERS_REGISTRY.slice(-4)} COPY
+                    <span className="text-[#c5a26f]">Registry</span>
+                    <button onClick={() => { navigator.clipboard.writeText(WRAPPERS_REGISTRY); toast.success("Copied"); }} className="btn btn-secondary text-[10px] px-2 py-px">
+                      {WRAPPERS_REGISTRY.slice(0,6)}… COPY
                     </button>
                   </div>
                 </div>
-                <div className="mt-2 text-[10px] text-zinc-500">Shield cUSDC via the official Zama wrappers UI, then bring it inside the castle.</div>
               </div>
 
               <button
                 onClick={handleShieldAndDeposit}
                 disabled={!isConnected || isDepositing || !depositAmount || isWritePending}
-                className="mt-4 w-full flex items-center justify-center gap-3 rounded-xl bg-white py-3.5 text-sm font-semibold text-zinc-950 disabled:bg-white/70 active:scale-[0.985] transition-all"
+                className="btn btn-primary mt-4 w-full justify-center py-3.5"
               >
                 <Shield className="h-4 w-4" />
-                {isDepositing || isWritePending ? "SEALING THE GATES..." : "SHIELD & BRING INSIDE"}
+                {isDepositing || isWritePending ? "SEALING..." : "SEAL & DEPOSIT"}
               </button>
 
-              <div className="mt-3 text-center text-[10px] text-emerald-400/80 leading-tight">
-                🔐 Real FHE encryption via Zama SDK → confidentialTransferAndCall<br />Only ciphertext enters the castle.
+              <div className="mt-3 text-center text-[10px] text-[#a1a1aa]">
+                Real FHE. Ciphertext only.
               </div>
 
-              {/* Live tx indicator */}
               <div className="mt-3 flex justify-center">
                 <LiveTx hash={lastTxHash} />
               </div>
@@ -763,23 +725,22 @@ export default function Celano() {
           </div>
         </div>
 
-        {/* Castle Ledger — activity history (dense, professional) */}
+        {/* Ledger */}
         {(activities.length > 0 || lastTxHash) && (
           <div className="mt-8">
             <div className="flex items-center justify-between px-1 mb-2">
-              <div className="text-xs tracking-[2px] text-zinc-500">CASTLE LEDGER</div>
-              <div className="text-[10px] text-zinc-500">Recent gates activity</div>
+              <div className="text-xs tracking-[1.5px] text-[#a1a1aa]">LEDGER</div>
+              <div className="text-[10px] text-[#a1a1aa]">Activity</div>
             </div>
-            <StoneWall className="mb-2 h-px" />
-            <div className="institutional-card rounded-2xl p-4 text-xs font-mono space-y-1.5 max-h-[148px] overflow-auto">
+            <div className="premium-card p-4 text-xs font-mono space-y-1.5 max-h-[148px] overflow-auto">
               {activities.length === 0 && (
-                <div className="text-zinc-500">No activity yet. Seal the first gate.</div>
+                <div className="text-[#a1a1aa]">No activity yet.</div>
               )}
               {activities.map((a, idx) => (
-                <div key={idx} className="flex items-start gap-3 text-white/70">
-                  <span className="text-emerald-400/70 w-16 shrink-0">{a.time}</span>
-                  <span className="font-medium text-white/90 w-36 shrink-0">{a.action}</span>
-                  <span className="text-white/60 flex-1 truncate">{a.detail}</span>
+                <div key={idx} className="flex items-start gap-3 text-[#a1a1aa]">
+                  <span className="text-[#c5a26f]/70 w-16 shrink-0">{a.time}</span>
+                  <span className="font-medium text-[#f4f4f5]/90 w-36 shrink-0">{a.action}</span>
+                  <span className="text-[#a1a1aa] flex-1 truncate">{a.detail}</span>
                   {a.tx && <LiveTx hash={a.tx} />}
                 </div>
               ))}
@@ -787,41 +748,34 @@ export default function Celano() {
           </div>
         )}
 
-        {/* How the Castle Protects You */}
-        <div className="mt-16 border-t border-white/10 pt-8 text-sm text-zinc-400 max-w-3xl">
-          <div className="uppercase tracking-[3px] text-xs text-zinc-500 mb-3">HOW THE CASTLE PROTECTS YOU</div>
+        {/* How it works — quiet, factual */}
+        <div className="mt-14 border-t border-[#252528] pt-8 text-sm text-[#a1a1aa] max-w-3xl">
+          <div className="uppercase tracking-[2px] text-xs text-[#a1a1aa] mb-3">HOW IT WORKS</div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6 text-sm">
             <div>
-              <div className="font-medium text-zinc-200">1. The Outer Walls</div>
-              <div className="mt-1">Public tokens pass through the official Zama Registry into ERC-7984 confidential tokens.</div>
+              <div className="font-medium text-[#f4f4f5]">1. Encrypt</div>
+              <div className="mt-1">Deposit flows through ERC-7984. Your balance becomes ciphertext (euint64).</div>
             </div>
             <div>
-              <div className="font-medium text-zinc-200">2. The Vault</div>
-              <div className="mt-1">Real <code>confidentialTransferAndCall</code> sends only ciphertext into the vault. Positions stay as euint64.</div>
+              <div className="font-medium text-[#f4f4f5]">2. Vault</div>
+              <div className="mt-1">confidentialTransferAndCall moves only encrypted data into the vault contract.</div>
             </div>
             <div>
-              <div className="font-medium text-zinc-200">3. Private Access</div>
-              <div className="mt-1">Only you can request decryption from the Zama KMS. Everyone else sees stone walls.</div>
+              <div className="font-medium text-[#f4f4f5]">3. Decrypt</div>
+              <div className="mt-1">You alone request KMS decryption via grant + permit. Nothing is public.</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Castle Status footer — industry density */}
-        <div className="mt-12 text-[10px] font-mono tracking-[2px] border-t border-white/10 pt-6 text-zinc-500 flex flex-wrap items-center gap-x-6 gap-y-1">
-        <div>THE CASTLE • CELANO</div>
-        <div>ABRUZZO • ITALY</div>
-        <div>CHAIN: SEPOLIA (FHEVM)</div>
-        <div>SECURITY: FHE • ERC-7984</div>
-        <div>STATE: {isConnected ? "GATES OPEN TO INITIATED" : "GATES CLOSED — CONNECT WALLET"}</div>
+      {/* Footer status */}
+      <div className="mx-auto max-w-7xl px-6 md:px-8 mt-10 border-t border-[#252528] pt-5 pb-10 text-[10px] font-mono tracking-[1px] text-[#a1a1aa] flex flex-wrap gap-x-6 gap-y-1">
+        <div>CELANO</div>
+        <div>ZAMA FHEVM</div>
+        <div>SEPOLIA</div>
+        <div>ERC-7984 • euint64</div>
+        <div>{isConnected ? "CONNECTED" : "DISCONNECTED"}</div>
       </div>
-
-      {/* Quick Castle Legend */}
-      <div className="mt-8 text-[10px] text-zinc-500 max-w-2xl">
-        CASTLE ROOMS: The Keep (portfolio) • The Treasury (positions) • The Armory (strategies &amp; deposits) • Gates (actions)
-      </div>
-
-      <Battlements className="opacity-30 mt-6" />
     </div>
   );
 }

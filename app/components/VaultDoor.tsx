@@ -1,31 +1,21 @@
 "use client";
 
-// Simple animated "vault door" / gate visual for loading / sealing states.
-// Keeps the castle theme without being cartoonish.
+// Clean vault status indicator. No emojis. Subtle, institutional.
 
 export function VaultDoor({ state = "closed" }: { state?: "closed" | "sealing" | "open" }) {
   const isSealing = state === "sealing";
+  const label = state === "open" ? "VAULT OPEN" : state === "sealing" ? "SEALING" : "SECURED";
+  const tone = state === "open" ? "text-emerald-400" : state === "sealing" ? "text-amber-400" : "text-[#c5a26f]";
 
   return (
-    <div className="relative mx-auto my-4 h-16 w-40 select-none">
-      <div className="absolute inset-0 rounded border-2 border-white/30 bg-zinc-900" />
-      {/* Battlement top */}
-      <div className="absolute -top-1 left-0 right-0 h-2 castle-battlements" />
-
-      <div
-        className={`absolute inset-[3px] flex items-center justify-center rounded border border-white/20 bg-black/60 font-mono text-[10px] tracking-[3px] text-white/60 transition-all ${isSealing ? "animate-pulse" : ""}`}
-      >
-        {state === "open" && "VAULT OPEN"}
-        {state === "sealing" && "SEALING..."}
-        {state === "closed" && "VAULT SECURED"}
+    <div className="mx-auto my-3 flex w-fit items-center gap-3 rounded-full border border-[#252528] bg-[#111113] px-4 py-1.5">
+      <div className={`h-1.5 w-1.5 rounded-full ${state === "open" ? "bg-emerald-400" : state === "sealing" ? "bg-amber-400 animate-pulse" : "bg-[#c5a26f]"}`} />
+      <div className={`font-mono text-[10px] tracking-[3px] ${tone}`}>
+        {label}
       </div>
-
-      {/* Lock symbol */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-emerald-400/70">
-        {state === "closed" && "🔒"}
-        {state === "sealing" && "⟳"}
-        {state === "open" && "🔓"}
-      </div>
+      {isSealing && (
+        <div className="h-px w-6 bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
+      )}
     </div>
   );
 }
