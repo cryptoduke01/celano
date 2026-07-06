@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CastleLogo } from "@/app/components/CastleMark";
 
 export default function Whitepaper() {
   return (
@@ -6,8 +7,10 @@ export default function Whitepaper() {
       <div className="mx-auto max-w-3xl px-8 py-16">
         <div className="mb-12 border-b border-white/10 pb-8">
           <Link href="/" className="text-sm text-zinc-400 hover:text-white">← Back to the Castle</Link>
-          <h1 className="mt-6 text-6xl font-semibold tracking-tight brand-heading">Celano</h1>
-          <p className="mt-2 text-xl text-zinc-400">The Castle • Private Yield on Zama Protocol</p>
+          <div className="mt-6">
+            <CastleLogo />
+          </div>
+          <p className="mt-3 text-xl text-zinc-400">The Castle • Private Yield on Zama Protocol</p>
           <p className="mt-4 text-sm text-zinc-500">Litepaper • Zama Developer Program Mainnet Season 3</p>
         </div>
 

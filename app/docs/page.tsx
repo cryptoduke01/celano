@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CastleLogo } from "@/app/components/CastleMark";
 
 export default function Docs() {
   return (
@@ -6,7 +7,10 @@ export default function Docs() {
       <div className="mx-auto max-w-4xl px-8 py-12">
         <Link href="/" className="text-sm text-zinc-400 hover:text-white">← Back to the Castle</Link>
 
-        <h1 className="mt-6 text-5xl font-semibold tracking-tight brand-heading">Documentation</h1>
+        <div className="mt-6">
+          <CastleLogo />
+        </div>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight brand-heading">Documentation</h1>
         <p className="mt-2 text-zinc-400">How to enter the castle and guard your yield.</p>
 
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">

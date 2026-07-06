@@ -21,6 +21,7 @@ import { Battlements, StoneWall, ASCIICastle, CastleMapDots } from "./components
 import { CastleMap } from "./components/CastleMap";
 import { VaultDoor } from "./components/VaultDoor";
 import { LiveTx } from "./components/LiveTx";
+import { CastleMark } from "./components/CastleMark";
 
 // Real Zama FHE hooks
 import { useEncrypt, useGrantPermit, useDecryptValues, useDelegatedDecryptValues } from "@zama-fhe/react-sdk";
@@ -54,6 +55,7 @@ export default function Celano() {
 
   const [decrypting, setDecrypting] = useState(false);
   const [privateValue, setPrivateValue] = useState<string | null>(null);
+  const [lastDecryptedHandle, setLastDecryptedHandle] = useState<string | null>(null);
   const [selectedStrategy, setSelectedStrategy] = useState(STRATEGIES[0]);
   const [depositAmount, setDepositAmount] = useState("");
   const [isDepositing, setIsDepositing] = useState(false);
@@ -160,15 +162,19 @@ export default function Celano() {
       if (decryptionInputs.length > 0) {
         const { data } = await refetchDecrypt();
 
-        if (data && Object.keys(data).length > 0) {
-          // Real clear value from KMS / relayer
-          const first = Object.values(data)[0] as bigint | number;
-          const num = typeof first === "bigint" ? Number(first) / 1_000_000 : Number(first);
-          const value = num.toFixed(2);
-          setPrivateValue(value);
-          logActivity("DECRYPTED (REAL)", `KMS plaintext: ${value} USD`);
-          toast.success("Real decryption from Zama KMS. Only you can see this.");
-        } else {
+      if (data && Object.keys(data).length > 0) {
+        // Real clear value from KMS / relayer
+        const first = Object.values(data)[0] as bigint | number;
+        const num = typeof first === "bigint" ? Number(first) / 1_000_000 : Number(first);
+        const value = num.toFixed(2);
+        setPrivateValue(value);
+
+        const handleUsed = (onChainSharesHandle || decryptionInputs[0]?.encryptedValue) as string | undefined;
+        setLastDecryptedHandle(handleUsed || null);
+
+        logActivity("DECRYPTED (REAL)", `KMS plaintext: ${value} USD`);
+        toast.success("Real decryption from Zama KMS. Only you can see this.");
+      } else {
           // No result yet (ACL / permit not fully propagated, or no on-chain position)
           const value = (12450 + Math.random() * 900).toFixed(2);
           setPrivateValue(value);
@@ -205,6 +211,10 @@ export default function Celano() {
         const num = typeof first === "bigint" ? Number(first) / 1_000_000 : Number(first);
         const value = num.toFixed(2);
         setPrivateValue(value);
+
+        const handleUsed = (pos.rawHandle || onChainSharesHandle) as string | undefined;
+        setLastDecryptedHandle(handleUsed || null);
+
         logActivity("DECRYPTED POSITION (REAL)", `${pos.token} ${value}`, lastTxHash);
         toast.success(`Real KMS decrypt for ${pos.token}. Only you see the plaintext.`);
       } else {
@@ -328,7 +338,7 @@ export default function Celano() {
         <div className="mx-auto max-w-7xl px-8 flex h-16 items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded bg-white text-zinc-950 font-bold tracking-[-1px] text-[21px]">C</div>
+              <CastleMark size={36} />
               <div>
                 <div className="font-semibold tracking-tight text-2xl brand-heading">Celano</div>
                 <div className="text-[9px] text-zinc-500 -mt-1.5 tracking-[2px]">THE CASTLE</div>
@@ -417,6 +427,12 @@ export default function Celano() {
                   </span>
                   <span className="text-3xl text-zinc-500">USD</span>
                 </div>
+
+                {lastDecryptedHandle && (
+                  <div className="mt-1 text-[10px] font-mono text-emerald-400/70">
+                    from {lastDecryptedHandle.slice(0, 10)}…{lastDecryptedHandle.slice(-6)}
+                  </div>
+                )}
                 <div className="mt-0.5 flex items-center gap-2 text-xs text-emerald-400/70">
                   + <span className="tabular-nums font-medium text-emerald-400">{accruedYield}</span> USD yield accrued today (encrypted)
                   <span className="text-[9px] text-emerald-400/50">LIVE</span>

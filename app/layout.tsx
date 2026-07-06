@@ -37,7 +37,8 @@ export const metadata: Metadata = {
   title: "Celano — The Castle | Private Yield on Zama",
   description: "Celano. The historic castle that guards your encrypted yield. Shield. Enter the keep. Only you can decrypt. Built with Zama FHE for the Builder Track.",
   icons: {
-    icon: "/next.svg",
+    icon: '/icon',
+    apple: '/apple-icon',
   },
 };
 
