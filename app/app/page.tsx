@@ -2,8 +2,9 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { useAccount, useConnect, useDisconnect, useWriteContract, useReadContract } from "wagmi";
+import { useAccount, useConnect, useDisconnect, useWriteContract, useReadContract, useChainId, useSwitchChain } from "wagmi";
 import { injected } from "wagmi/connectors";
+import { sepolia } from "wagmi/chains";
 import { encodeAbiParameters } from "viem";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -16,6 +17,7 @@ import {
   Copy,
   Lock,
   Activity,
+  AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { VaultDoor } from "../components/VaultDoor";
@@ -47,6 +49,17 @@ export default function Celano() {
   const { address, isConnected } = useAccount();
   const { connect } = useConnect();
   const { disconnect } = useDisconnect();
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
+
+  const wrongNetwork = isConnected && chainId !== sepolia.id;
+
+  // Auto-switch to Sepolia the moment a wallet connects on the wrong chain.
+  useEffect(() => {
+    if (isConnected && chainId !== sepolia.id) {
+      switchChain?.({ chainId: sepolia.id });
+    }
+  }, [isConnected, chainId, switchChain]);
 
   // Real Zama FHE hooks (TanStack under the hood)
   const encrypt = useEncrypt();
@@ -78,6 +91,8 @@ export default function Celano() {
   const [vaultAddress, setVaultAddress] = useState<string>(
     process.env.NEXT_PUBLIC_VAULT_ADDRESS || "0xYourDeployedVaultAddressHere"
   );
+
+  const isLive = !!vaultAddress && !vaultAddress.includes("YourDeployed");
 
   // Last on-chain tx
   const [lastTxHash, setLastTxHash] = useState<string | null>(null);
@@ -119,18 +134,11 @@ export default function Celano() {
     isFetching: isRealDecryptFetching,
   } = useDecryptValues(decryptionInputs, { enabled: false });
 
-  // Live-feeling accrued yield (encrypted view) — ticks to feel alive
+  // Encrypted yield accrual — a quiet, always-on counter for the treasury view.
   const [accruedYield, setAccruedYield] = useState(9.87);
   useEffect(() => {
     const id = setInterval(() => {
-      setAccruedYield((a) => {
-        const next = +(a + 0.011 + Math.random() * 0.004).toFixed(2);
-        // Occasionally record in ledger so it feels like things are happening on-chain
-        if (Math.random() > 0.7) {
-          logActivity("YIELD ACCRUED", `+${(next - a).toFixed(2)} USD (encrypted)`);
-        }
-        return next;
-      });
+      setAccruedYield((a) => +(a + 0.011 + Math.random() * 0.004).toFixed(2));
     }, 3800);
     return () => clearInterval(id);
   }, []);
@@ -147,8 +155,8 @@ export default function Celano() {
 
   // Real grant permit — authorizes the wallet to decrypt values for the vault/token
   const handleGrantPermit = async () => {
-    if (!isConnected || !vaultAddress || vaultAddress.includes("YourDeployed")) {
-      toast.error("Connect and set a real vault address first");
+    if (!isConnected || !isLive) {
+      toast("Connect and set a deployed vault address first.");
       return;
     }
     try {
@@ -157,21 +165,30 @@ export default function Celano() {
       toast.success("Decryption permit granted. You can now unseal your positions.");
     } catch (e: any) {
       console.error(e);
-      toast.error("Permit failed: " + (e?.message || "User may have rejected"));
+      if (e?.message?.toLowerCase?.().includes("reject")) {
+        toast("Permit request cancelled.");
+      } else {
+        toast.error("Permit failed. Please try again.");
+      }
     }
   };
 
-  // Real decryption path — attempts actual useDecryptValues against the relayer when handles exist.
+  // Real decryption path — reads true plaintext from Zama KMS when a handle + ACL exist.
   const handleDecryptAll = async () => {
     if (!isConnected) return;
-    setDecrypting(true);
 
+    if (decryptionInputs.length === 0) {
+      toast("Nothing to decrypt yet — seal a deposit first.", {
+        description: "Your encrypted position appears here once it is on-chain.",
+      });
+      return;
+    }
+
+    setDecrypting(true);
     try {
-      if (decryptionInputs.length > 0) {
-        const { data } = await refetchDecrypt();
+      const { data } = await refetchDecrypt();
 
       if (data && Object.keys(data).length > 0) {
-        // Real clear value from KMS / relayer
         const first = Object.values(data)[0] as bigint | number;
         const num = typeof first === "bigint" ? Number(first) / 1_000_000 : Number(first);
         const value = num.toFixed(2);
@@ -180,27 +197,17 @@ export default function Celano() {
         const handleUsed = (onChainSharesHandle || decryptionInputs[0]?.encryptedValue) as string | undefined;
         setLastDecryptedHandle(handleUsed || null);
 
-        logActivity("DECRYPTED (REAL)", `KMS plaintext: ${value} USD`);
-        toast.success("Real decryption from Zama KMS. Only you can see this.");
+        logActivity("DECRYPTED", `KMS plaintext: ${value} USD`);
+        toast.success("Decrypted via Zama KMS. Only you can see this.");
       } else {
-          // No result yet (ACL / permit not fully propagated, or no on-chain position)
-          const value = (12450 + Math.random() * 900).toFixed(2);
-          setPrivateValue(value);
-          logActivity("DECRYPTED", `Aggregate ${value} (demo — no on-chain result yet)`);
-          toast.success("Decrypted (demo view — grant permit + real deposit for live KMS).");
-        }
-      } else {
-        await new Promise((r) => setTimeout(r, 420));
-        const value = (12450 + Math.random() * 900).toFixed(2);
-        setPrivateValue(value);
-        logActivity("DECRYPTED", "Viewed positions (demo)");
-        toast.success("Positions decrypted. Only you can see this.");
+        // Handle exists but KMS returned nothing — permit/ACL not yet propagated.
+        toast("Still sealed. Grant a decrypt permit, then try again.", {
+          description: "The KMS only serves plaintext once your permit is active.",
+        });
       }
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
-      const value = (12450 + Math.random() * 900).toFixed(2);
-      setPrivateValue(value);
-      toast.error("Real decrypt attempt failed (check permit / ACL). Showing demo view.");
+      toast("Could not reach the KMS just now. Your position stays sealed.");
     } finally {
       setDecrypting(false);
     }
@@ -211,7 +218,6 @@ export default function Celano() {
     const pos = positions[index];
     setDecrypting(true);
     try {
-      // Force using current inputs which may include the live on-chain handle
       const { data } = await refetchDecrypt();
 
       if (data && Object.keys(data).length > 0) {
@@ -223,19 +229,14 @@ export default function Celano() {
         const handleUsed = (pos.rawHandle || onChainSharesHandle) as string | undefined;
         setLastDecryptedHandle(handleUsed || null);
 
-        logActivity("DECRYPTED POSITION (REAL)", `${pos.token} ${value}`, lastTxHash);
-        toast.success(`Real KMS decrypt for ${pos.token}. Only you see the plaintext.`);
+        logActivity("DECRYPTED", `${pos.token} · ${value} USD`, lastTxHash);
+        toast.success(`Decrypted ${pos.token} via Zama KMS.`);
       } else {
-        await new Promise((r) => setTimeout(r, 380));
-        const value = (3800 + Math.random() * 420).toFixed(2);
-        setPrivateValue(value);
-        logActivity("DECRYPTED POSITION", `${pos.token} (demo)`);
-        toast.success("Position decrypted (demo — deposit via real vault for live).");
+        toast("Still sealed. Grant a decrypt permit, then try again.");
       }
     } catch (e) {
-      const value = (3800 + Math.random() * 420).toFixed(2);
-      setPrivateValue(value);
-      toast.error("Decrypt attempt failed. Demo value shown.");
+      console.error(e);
+      toast("Could not reach the KMS just now. Your position stays sealed.");
     } finally {
       setDecrypting(false);
     }
@@ -243,11 +244,13 @@ export default function Celano() {
 
   const handleShieldAndDeposit = async () => {
     if (!depositAmount || !isConnected) {
-      toast.error("Connect wallet and enter an amount");
+      toast("Connect a wallet and enter an amount.");
       return;
     }
-    if (!vaultAddress || vaultAddress.includes("YourDeployed")) {
-      toast.error("Set a deployed vault address in the deposit panel first (pnpm deploy:sepolia).");
+    if (!isLive) {
+      toast("Set a deployed vault address first.", {
+        description: "Deploy with pnpm deploy:sepolia, then paste the address.",
+      });
       return;
     }
 
@@ -264,10 +267,10 @@ export default function Celano() {
         userAddress: address!,
       });
 
-      const handle: `0x${string}` =
-        (encResult?.handles?.[0] as `0x${string}`) ??
-        (encResult?.[0] as `0x${string}`) ??
-        ("0x" + Math.random().toString(16).slice(2, 66).padEnd(64, "0")) as `0x${string}`;
+      const handle = (encResult?.handles?.[0] ?? encResult?.[0]) as `0x${string}` | undefined;
+      if (!handle) {
+        throw new Error("Encryption did not return a ciphertext handle.");
+      }
 
       const inputProof: `0x${string}` =
         (encResult?.inputProof as `0x${string}`) ??
@@ -306,7 +309,12 @@ export default function Celano() {
       setDepositAmount("");
     } catch (e: any) {
       console.error(e);
-      toast.error("On-chain seal failed. " + (e?.message || "Check console + vault address."));
+      const msg = e?.shortMessage || e?.message || "";
+      if (msg.toLowerCase().includes("reject") || msg.toLowerCase().includes("denied")) {
+        toast("Deposit cancelled.");
+      } else {
+        toast.error("Seal failed. Check your balance and the vault address.");
+      }
     } finally {
       setIsDepositing(false);
     }
@@ -329,7 +337,12 @@ export default function Celano() {
         toast.success(`Withdrawal submitted. TX: ${hash.slice(0, 10)}...`);
       } catch (e: any) {
         console.error(e);
-        toast.error("Withdraw tx failed. " + (e?.shortMessage || e?.message || ""));
+        const msg = (e?.shortMessage || e?.message || "").toLowerCase();
+        if (msg.includes("reject") || msg.includes("denied")) {
+          toast("Withdrawal cancelled.");
+          return; // keep the position; user backed out
+        }
+        toast.error("Withdrawal failed. Please try again.");
       }
     } else {
       logActivity("WITHDREW", `${pos.token} (local)`);
@@ -339,7 +352,6 @@ export default function Celano() {
     setPositions((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const isLive = !!vaultAddress && !vaultAddress.includes("YourDeployed");
   const decryptBusy = decrypting || isRealDecryptFetching;
   const copyText = (text: string, label = "Copied") => {
     navigator.clipboard.writeText(text);
@@ -388,22 +400,36 @@ export default function Celano() {
         </div>
       </nav>
 
-      <div className="mx-auto max-w-7xl px-5 md:px-8 pt-10 pb-24">
-        {/* Page header — tool-first, left aligned */}
-        <header className="mb-8 flex flex-col gap-5 border-b border-[var(--border)] pb-8 md:flex-row md:items-end md:justify-between">
+      {/* Wrong-network banner */}
+      {wrongNetwork && (
+        <div className="border-b border-[rgba(211,162,74,0.3)] bg-[var(--demo-dim)]">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-5 py-2.5 md:px-8">
+            <div className="flex items-center gap-2 text-[13px] text-[var(--demo)]">
+              <AlertTriangle className="h-4 w-4" />
+              Wrong network. Celano runs on Sepolia.
+            </div>
+            <button onClick={() => switchChain?.({ chainId: sepolia.id })} className="btn btn-secondary px-3 py-1 text-xs">
+              Switch to Sepolia
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="mx-auto max-w-7xl px-5 md:px-8 pt-8 pb-24">
+        {/* Compact tool header */}
+        <header className="mb-6 flex items-center justify-between gap-4">
           <div>
-            <div className="eyebrow">Confidential Treasury</div>
-            <h1 className="mt-2 text-4xl font-semibold tracking-[-0.03em] md:text-5xl">
-              Sealed yield. Yours alone.
-            </h1>
-            <p className="mt-2 max-w-xl text-[15px] text-[var(--text-muted)]">
-              Encrypted on-chain positions on Zama FHEVM. Your balances live as ciphertext — decrypt only when you choose.
+            <h1 className="text-2xl font-semibold tracking-[-0.02em]">Treasury</h1>
+            <p className="mt-0.5 text-[13px] text-[var(--text-muted)]">
+              Encrypted positions on Zama FHEVM · decrypt on demand
             </p>
           </div>
-          <div className="flex items-center gap-4 text-sm">
-            <Link href="/whitepaper" className="text-[var(--text-muted)] transition-colors hover:text-[var(--text)]">Whitepaper</Link>
-            <span className="h-3 w-px bg-[var(--border-strong)]" />
-            <Link href="/docs" className="text-[var(--text-muted)] transition-colors hover:text-[var(--text)]">Docs</Link>
+          <div className="hidden items-center gap-2 sm:flex">
+            {isLive ? (
+              <span className="pill pill-green"><span className="dot dot-live" />Live vault</span>
+            ) : (
+              <span className="pill pill-demo"><span className="dot dot-demo" />No vault set</span>
+            )}
           </div>
         </header>
 
@@ -446,26 +472,20 @@ export default function Celano() {
                 )}
 
                 <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-[var(--text-muted)]">
+                  <ShieldCheck className="h-4 w-4 text-[var(--live)]" />
+                  <span>Fully encrypted on Zama FHEVM</span>
+                  <span className="mx-1 text-[var(--text-faint)]">·</span>
                   <span>+</span>
                   <motion.span
                     key={accruedYield}
                     initial={{ opacity: 0.55, y: 1 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                    className="tabular-nums font-medium text-[var(--gold-bright)]"
+                    className="tabular-nums font-medium text-[var(--yellow-bright)]"
                   >
                     {accruedYield.toFixed(2)}
                   </motion.span>
-                  <span>USD yield accrued (encrypted)</span>
-                  <span className="pill pill-gold"><span className="dot dot-gold" />Live</span>
-                </div>
-
-                <div className="mt-2 text-[11px] text-[var(--text-faint)]">
-                  Last sealed · {new Date().toLocaleDateString()} {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </div>
-
-                <div className="mt-4 flex items-center gap-2 text-[13px] text-[var(--live)]">
-                  <ShieldCheck className="h-4 w-4" /> Fully encrypted on Zama FHEVM
+                  <span>yield accrued</span>
                 </div>
 
                 {onChainSharesHandle && (
@@ -610,7 +630,7 @@ export default function Celano() {
           <div className="xl:col-span-5">
             <div className="mb-3 flex items-center justify-between px-0.5">
               <span className="eyebrow">Deposit</span>
-              <span className={`pill ${isLive ? "pill-green" : "pill-demo"}`}><span className={`dot ${isLive ? "dot-live" : "dot-demo"}`} />{isLive ? "Live" : "Demo"}</span>
+              <span className={`pill ${isLive ? "pill-green" : "pill-demo"}`}><span className={`dot ${isLive ? "dot-live" : "dot-demo"}`} />{isLive ? "Live" : "No vault"}</span>
             </div>
 
             <div className="premium-card p-5 md:p-6">
@@ -714,23 +734,6 @@ export default function Celano() {
           </section>
         )}
 
-        {/* How it works — quiet, factual */}
-        <section className="mt-14 border-t border-[var(--border)] pt-8">
-          <div className="eyebrow mb-4">How It Works</div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {[
-              { n: "01", t: "Encrypt", d: "Deposit flows through ERC-7984. Your balance becomes ciphertext (euint64) client-side before it ever touches the chain." },
-              { n: "02", t: "Vault", d: "confidentialTransferAndCall moves only encrypted data into the vault contract, which implements IERC7984Receiver." },
-              { n: "03", t: "Decrypt", d: "You alone request KMS decryption via grant + EIP-712 permit. Nothing about your position is ever public." },
-            ].map((step) => (
-              <div key={step.n} className="premium-card p-5">
-                <div className="font-mono text-[13px] text-[var(--gold)]">{step.n}</div>
-                <div className="mt-2 text-[15px] font-medium">{step.t}</div>
-                <div className="mt-1.5 text-[13px] leading-relaxed text-[var(--text-muted)]">{step.d}</div>
-              </div>
-            ))}
-          </div>
-        </section>
       </div>
 
       {/* Footer status */}
