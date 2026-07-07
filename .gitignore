@@ -45,3 +45,11 @@ next-env.d.ts
 /artifacts
 /cache
 /typechain-types
+
+# hardhat/fhevm generated temp
+/fhevmTemp
+
+# local agent tooling
+/.codex
+/.agents
+/.claude
