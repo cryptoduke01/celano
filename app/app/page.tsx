@@ -18,6 +18,7 @@ import {
   Lock,
   Activity,
   AlertTriangle,
+  Droplet,
 } from "lucide-react";
 import { toast } from "sonner";
 import { VaultDoor } from "../components/VaultDoor";
@@ -28,11 +29,13 @@ import { CastleMark } from "../components/CastleMark";
 import { useEncrypt, useGrantPermit, useDecryptValues, useDelegatedDecryptValues } from "@zama-fhe/react-sdk";
 
 // ABIs
-import { IERC7984_ABI, CONFIDENTIAL_YIELD_VAULT_ABI } from "@/lib/abis";
+import { IERC7984_ABI, CONFIDENTIAL_YIELD_VAULT_ABI, MOCK_USDC_ABI, ERC7984_WRAPPER_ABI } from "@/lib/abis";
 
 // Sepolia official Zama addresses (from protocol docs)
 const WRAPPERS_REGISTRY = "0x2f0750Bbb0A246059d80e94c454586a7F27a128e" as const;
 const C_USDC_MOCK = "0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639" as const;
+// Underlying public-mint mock USDC behind the cUSDC wrapper.
+const USDC_MOCK = "0x9b5Cd13b8eFbB58Dc25A05CF411D8056058aDFfF" as const;
 
 const STRATEGIES = [
   {
@@ -50,7 +53,7 @@ export default function Celano() {
   const { connect } = useConnect();
   const { disconnect } = useDisconnect();
   const chainId = useChainId();
-  const { switchChain } = useSwitchChain();
+  const { switchChain, switchChainAsync } = useSwitchChain();
 
   const wrongNetwork = isConnected && chainId !== sepolia.id;
 
@@ -60,6 +63,19 @@ export default function Celano() {
       switchChain?.({ chainId: sepolia.id });
     }
   }, [isConnected, chainId, switchChain]);
+
+  // Guard: ensure the wallet is on Sepolia before any signature/transaction.
+  // Returns true only once the wallet is confirmed on Sepolia.
+  const ensureSepolia = async (): Promise<boolean> => {
+    if (chainId === sepolia.id) return true;
+    try {
+      await switchChainAsync({ chainId: sepolia.id });
+      return true;
+    } catch {
+      toast("Switch your wallet to Sepolia to continue.");
+      return false;
+    }
+  };
 
   // Real Zama FHE hooks (TanStack under the hood)
   const encrypt = useEncrypt();
@@ -159,6 +175,7 @@ export default function Celano() {
       toast("Connect and set a deployed vault address first.");
       return;
     }
+    if (!(await ensureSepolia())) return;
     try {
       await grantPermit.mutateAsync([vaultAddress as `0x${string}`, selectedStrategy.address as `0x${string}`]);
       logActivity("PERMIT GRANTED", "Authorized KMS decryption for this account");
@@ -242,6 +259,59 @@ export default function Celano() {
     }
   };
 
+  // One-click test faucet: mint mock USDC → approve wrapper → wrap into cUSDC.
+  const [isFauceting, setIsFauceting] = useState(false);
+  const handleGetTestCUSDC = async () => {
+    if (!isConnected || !address) {
+      toast("Connect a wallet first.");
+      return;
+    }
+    if (!(await ensureSepolia())) return;
+
+    setIsFauceting(true);
+    const amount = BigInt(100_000_000); // 100 USDC (6 decimals)
+    try {
+      toast("Step 1/3 — minting test USDC…");
+      const mintHash = await writeContractAsync({
+        address: USDC_MOCK,
+        abi: MOCK_USDC_ABI,
+        functionName: "mint",
+        args: [address, amount],
+      });
+      setLastTxHash(mintHash);
+
+      toast("Step 2/3 — approving the cUSDC wrapper…");
+      await writeContractAsync({
+        address: USDC_MOCK,
+        abi: MOCK_USDC_ABI,
+        functionName: "approve",
+        args: [C_USDC_MOCK, amount],
+      });
+
+      toast("Step 3/3 — wrapping into confidential cUSDC…");
+      const wrapHash = await writeContractAsync({
+        address: C_USDC_MOCK,
+        abi: ERC7984_WRAPPER_ABI,
+        functionName: "wrap",
+        args: [address, amount],
+      });
+      setLastTxHash(wrapHash);
+
+      logActivity("FAUCET", "Minted + wrapped 100 cUSDC", wrapHash);
+      toast.success("100 test cUSDC ready. You can seal a deposit now.");
+    } catch (e: any) {
+      console.error(e);
+      const msg = (e?.shortMessage || e?.message || "").toLowerCase();
+      if (msg.includes("reject") || msg.includes("denied")) {
+        toast("Faucet cancelled.");
+      } else {
+        toast.error("Faucet failed. Check you have Sepolia ETH for gas.");
+      }
+    } finally {
+      setIsFauceting(false);
+    }
+  };
+
   const handleShieldAndDeposit = async () => {
     if (!depositAmount || !isConnected) {
       toast("Connect a wallet and enter an amount.");
@@ -253,6 +323,7 @@ export default function Celano() {
       });
       return;
     }
+    if (!(await ensureSepolia())) return;
 
     setIsDepositing(true);
     setLastTxHash(null);
@@ -325,6 +396,7 @@ export default function Celano() {
 
     // If we have a real vault configured, attempt on-chain withdraw
     if (vaultAddress && !vaultAddress.includes("YourDeployed")) {
+      if (!(await ensureSepolia())) return;
       try {
         const hash = await writeContractAsync({
           address: vaultAddress as `0x${string}`,
@@ -678,7 +750,17 @@ export default function Celano() {
               </div>
 
               <div className="card-inset mt-3 p-3">
-                <div className="eyebrow mb-2">Test Assets</div>
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="eyebrow">Test Assets</span>
+                  <button
+                    onClick={handleGetTestCUSDC}
+                    disabled={!isConnected || isFauceting || isWritePending}
+                    className="btn btn-secondary px-2.5 py-1 text-[11px]"
+                  >
+                    <Droplet className="h-3 w-3" />
+                    {isFauceting ? "Minting…" : "Get 100 test cUSDC"}
+                  </button>
+                </div>
                 <div className="space-y-1.5 font-mono text-[11px]">
                   <div className="flex items-center justify-between">
                     <span className="text-[var(--gold-bright)]">cUSDC</span>
@@ -688,6 +770,9 @@ export default function Celano() {
                     <span className="text-[var(--gold-bright)]">Registry</span>
                     <button onClick={() => copyText(WRAPPERS_REGISTRY)} className="btn btn-secondary px-2 py-0.5 text-[10px]">{WRAPPERS_REGISTRY.slice(0, 6)}… <Copy className="h-3 w-3" /></button>
                   </div>
+                </div>
+                <div className="mt-2 text-[10.5px] leading-snug text-[var(--text-faint)]">
+                  Mints mock USDC, approves the wrapper, and wraps it into confidential cUSDC — three quick wallet confirmations.
                 </div>
               </div>
 

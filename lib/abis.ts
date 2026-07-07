@@ -36,6 +36,68 @@ export const IERC7984_ABI = [
   },
 ] as const;
 
+// Underlying mock USDC (public faucet) — ERC-20 with an open mint.
+export const MOCK_USDC_ABI = [
+  {
+    type: "function",
+    name: "mint",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "to", type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "approve",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "spender", type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [{ name: "", type: "bool" }],
+  },
+  {
+    type: "function",
+    name: "allowance",
+    stateMutability: "view",
+    inputs: [
+      { name: "owner", type: "address" },
+      { name: "spender", type: "address" },
+    ],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "balanceOf",
+    stateMutability: "view",
+    inputs: [{ name: "account", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+] as const;
+
+// ERC-7984 ERC-20 wrapper — wrap public USDC into confidential cUSDC.
+export const ERC7984_WRAPPER_ABI = [
+  {
+    type: "function",
+    name: "wrap",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "to", type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [{ name: "", type: "bytes32" }], // euint64 handle
+  },
+  {
+    type: "function",
+    name: "underlying",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "address" }],
+  },
+] as const;
+
 export const CONFIDENTIAL_YIELD_VAULT_ABI = [
   {
     type: "function",

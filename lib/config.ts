@@ -20,13 +20,14 @@ export const wagmiConfig = createConfig({
 });
 
 // Zama FHE chain config.
-// For production-grade apps, run your own relayer proxy at /api/relayer/:chainId
-// and point relayerUrl there. For fast demo we try the public relayer pattern.
+// Use the SDK's built-in Sepolia chain as-is — it already carries the correct
+// testnet relayer (https://relayer.testnet.zama.org/v2), ACL, and KMS addresses.
+// Only override relayerUrl if you run your own proxy at /api/relayer/:chainId.
 export const mySepoliaFhe: FheChain = {
   ...sepoliaFhe,
-  // Public community / Zama relayer endpoints are documented in Zama SDK guides.
-  // Many teams proxy. We default to the documented public pattern for Sepolia.
-  relayerUrl: "https://relayer.zama.ai",
+  ...(process.env.NEXT_PUBLIC_RELAYER_URL
+    ? { relayerUrl: process.env.NEXT_PUBLIC_RELAYER_URL }
+    : {}),
 } as const satisfies FheChain;
 
 export const zamaConfig = createZamaConfig({

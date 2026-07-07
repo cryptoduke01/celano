@@ -12,7 +12,7 @@ Run it locally with `pnpm dev` (uses `.env.local`), or test the deployed site on
 
 1. **Wallet on Sepolia.** MetaMask (or any injected wallet). The app auto-prompts the switch to Sepolia on connect, so you can start on any network.
 2. **Sepolia ETH for gas.** Your deployer wallet `0x8F47aE9eC148903C8535b9289ad8efA400e026B6` already has some; any wallet you test with needs a little gas. Faucet: https://www.alchemy.com/faucets/ethereum-sepolia
-3. **Some cUSDC (the confidential token) to deposit.** This is the one dependency the deposit needs. cUSDC is the confidential wrapper of a test USDC. Addresses are in the app: **Deposit panel → Test Assets** (cUSDC `0x7c5BF43B…223639`, Registry `0x2f0750Bb…7a128e`). You need a **confidential balance** of cUSDC on your wallet — i.e. wrap/mint via the Zama wrappers registry first. *(If you can't get cUSDC, do the "no-token" checks below — the encrypt + UI + network paths still verify; only the on-chain transfer needs the balance.)*
+3. **Test cUSDC — one click in the app.** In the **Deposit panel → Test Assets**, click **"Get 100 test cUSDC"**. It runs three quick wallet confirmations: mint mock USDC → approve the wrapper → wrap into confidential cUSDC. After that you have a cUSDC balance and can deposit. (All it needs is a little Sepolia ETH for gas.)
 
 ---
 
@@ -44,6 +44,7 @@ Work top to bottom. For each: note **what you expected**, **what happened**, and
 - [ ] Reject it instead → calm "Permit request cancelled." (no red error).
 
 ### 5. Deposit — the real FHE flow (needs cUSDC + gas)
+- [ ] If you have no cUSDC yet, click **Get 100 test cUSDC** (Test Assets) and approve the 3 prompts.
 - [ ] Enter an amount, e.g. `10`. Click **Seal & Deposit**.
 - [ ] First a brief pause = **client-side encryption** (the amount becomes ciphertext in your browser).
 - [ ] Then wallet prompts a **transaction** = `confidentialTransferAndCall` on the cUSDC token.
