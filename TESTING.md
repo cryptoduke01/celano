@@ -90,6 +90,12 @@ You can dump it all in one message; I'll triage and fix in order of impact.
 
 ---
 
+## How decryption works (FAQ)
+
+- **It's on-demand and repeatable, not one-time.** Each Decrypt click asks the Zama KMS for the *current* plaintext of your encrypted handle and reveals it locally in your browser. Refresh or disconnect and it re-masks to `••••••` — the plaintext is never stored or sent anywhere.
+- **The permit is the durable part.** The EIP-712 signature authorizes the KMS to serve *your* account for that contract. Once granted, you can decrypt repeatedly without re-signing (until it expires or you revoke it). So: sign the permit once → decrypt as many times as you want.
+- **Only you can do it.** Nobody else — not the vault, not the chain, not us — can request or receive your plaintext.
+
 ## Known/expected, not bugs
 
 - **Encrypted yield accrual ticker** — a small always-on counter in the Treasury card. It's a display element (labeled "yield accrued"), not a claim of on-chain interest.

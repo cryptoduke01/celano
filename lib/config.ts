@@ -1,20 +1,32 @@
-import { createConfig, http } from "wagmi";
+import { createConfig, http, fallback } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import { QueryClient } from "@tanstack/react-query";
 import { createConfig as createZamaConfig } from "@zama-fhe/react-sdk/wagmi";
 import { web } from "@zama-fhe/sdk/web";
 import { sepolia as sepoliaFhe, type FheChain } from "@zama-fhe/sdk/chains";
 
-// Sepolia RPC — override with NEXT_PUBLIC_SEPOLIA_RPC for the hosted demo
-// (public endpoints rate-limit under real traffic). Falls back to a public gateway.
-const SEPOLIA_RPC =
-  process.env.NEXT_PUBLIC_SEPOLIA_RPC || "https://sepolia.gateway.tenderly.co";
+// Sepolia RPCs. A single public endpoint (e.g. Alchemy's shared "demo" key)
+// rate-limits (HTTP 429) under any real traffic, so we use a fallback list:
+// viem rolls over to the next endpoint on failure. A dedicated endpoint set via
+// NEXT_PUBLIC_SEPOLIA_RPC takes priority.
+const SEPOLIA_RPCS = [
+  process.env.NEXT_PUBLIC_SEPOLIA_RPC,
+  "https://ethereum-sepolia-rpc.publicnode.com",
+  "https://sepolia.gateway.tenderly.co",
+  "https://1rpc.io/sepolia",
+  "https://sepolia.drpc.org",
+].filter(Boolean) as string[];
+
+const sepoliaTransport = fallback(
+  SEPOLIA_RPCS.map((url) => http(url, { timeout: 12_000 })),
+  { rank: false, retryCount: 2 }
+);
 
 // Wagmi config
 export const wagmiConfig = createConfig({
   chains: [sepolia],
   transports: {
-    [sepolia.id]: http(SEPOLIA_RPC),
+    [sepolia.id]: sepoliaTransport,
   },
   ssr: true,
 });
@@ -25,6 +37,9 @@ export const wagmiConfig = createConfig({
 // Only override relayerUrl if you run your own proxy at /api/relayer/:chainId.
 export const mySepoliaFhe: FheChain = {
   ...sepoliaFhe,
+  // Pin the SDK's own read RPC to a reliable endpoint (avoids the shared
+  // Alchemy demo key that returns 429). Prefer a dedicated one if provided.
+  network: process.env.NEXT_PUBLIC_SEPOLIA_RPC || SEPOLIA_RPCS[0],
   ...(process.env.NEXT_PUBLIC_RELAYER_URL
     ? { relayerUrl: process.env.NEXT_PUBLIC_RELAYER_URL }
     : {}),
