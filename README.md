@@ -82,6 +82,7 @@ so it opens in LIVE mode) or paste the address into the UI → **Deposit → Vau
 - ✅ Production build clean (Next.js 16 + strict TS), pre-flight passes
 - ✅ Institutional UI + documented design system
 - ✅ Whitepaper + Docs + submission kit
-- ⏳ Sepolia vault deploy + Vercel deploy + video
+- ✅ Vault live on Sepolia: [`0x01eDE7bDA2FaDBf4D83b71337ea4dfA2Ea5e7d37`](https://sepolia.etherscan.io/address/0x01eDE7bDA2FaDBf4D83b71337ea4dfA2Ea5e7d37)
+- ⏳ Vercel deploy + video
 
 Targeting Builder Track 1st place.

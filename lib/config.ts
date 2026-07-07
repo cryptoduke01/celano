@@ -5,8 +5,10 @@ import { createConfig as createZamaConfig } from "@zama-fhe/react-sdk/wagmi";
 import { web } from "@zama-fhe/sdk/web";
 import { sepolia as sepoliaFhe, type FheChain } from "@zama-fhe/sdk/chains";
 
-// Public Sepolia RPC (replace with your own for production load)
-const SEPOLIA_RPC = "https://sepolia.gateway.tenderly.co" as const;
+// Sepolia RPC — override with NEXT_PUBLIC_SEPOLIA_RPC for the hosted demo
+// (public endpoints rate-limit under real traffic). Falls back to a public gateway.
+const SEPOLIA_RPC =
+  process.env.NEXT_PUBLIC_SEPOLIA_RPC || "https://sepolia.gateway.tenderly.co";
 
 // Wagmi config
 export const wagmiConfig = createConfig({

@@ -6,9 +6,9 @@
 
 **Repo**: https://github.com/cryptoduke01/celano
 
-**Live Demo**: _(Vercel link after deploy)_
+**Live Demo**: https://celano.vercel.app
 
-**Deployed Vault (Sepolia)**: _(address after `pnpm deploy:sepolia`)_
+**Deployed Vault (Sepolia)**: [`0x01eDE7bDA2FaDBf4D83b71337ea4dfA2Ea5e7d37`](https://sepolia.etherscan.io/address/0x01eDE7bDA2FaDBf4D83b71337ea4dfA2Ea5e7d37) — `ConfidentialYieldVault`, accepts cUSDC `0x7c5BF43B851c1dff1a4feE8dB225b87f2C223639`
 
 **Video**: 3-minute walkthrough (script below)
 
@@ -88,7 +88,7 @@ On public chains, your balances, positions, and strategy are visible to everyone
 - ✅ Institutional UI shipped; design system documented in `DESIGN.md`.
 - ✅ Whitepaper + Docs pages live; README + this submission kit updated.
 - ✅ Contract + deploy script ready (`pnpm deploy:sepolia`).
-- ⏳ Deploy vault to Sepolia and set `NEXT_PUBLIC_VAULT_ADDRESS` for a default-LIVE demo.
+- ✅ Vault deployed to Sepolia (`0x01eDE7bDA2FaDBf4D83b71337ea4dfA2Ea5e7d37`); app runs in LIVE mode via `NEXT_PUBLIC_VAULT_ADDRESS`.
 - ⏳ Deploy frontend to Vercel; record the 3-minute video; capture screenshots.
 
 **Target**: Zama Builder Track — 1st place.
